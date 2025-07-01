@@ -2,13 +2,10 @@ const express = require("express");
 const app = express();
 const mysql = require("mysql2");
 const cors = require("cors");
-const { ethers } = require("ethers");
-const crypto = require("crypto");
 require("dotenv").config({ path: "../.env" });
 
 app.use(cors());
 app.use(express.json());
-
 const db = mysql.createConnection({
   user: "root",
   host: "localhost",
@@ -16,316 +13,18 @@ const db = mysql.createConnection({
   database: "supplychain",
 });
 
-// Encryption key for storing private keys (add this to your .env file)
-// Encryption key for storing private keys (add this to your .env file)
-const ENCRYPTION_KEY_STRING =
-  process.env.WALLET_ENCRYPTION_KEY || "your-32-character-secret-key-here!!";
-const ENCRYPTION_KEY = crypto
-  .createHash("sha256")
-  .update(ENCRYPTION_KEY_STRING)
-  .digest();
-const ALGORITHM = "aes-256-cbc";
-
-// Function to encrypt private key
-function encryptPrivateKey(privateKey) {
-  try {
-    // Generate a random initialization vector
-    const iv = crypto.randomBytes(16);
-
-    // Create cipher
-    const cipher = crypto.createCipheriv(
-      ALGORITHM,
-      Buffer.from(ENCRYPTION_KEY),
-      iv
-    );
-
-    // Encrypt the private key
-    let encrypted = cipher.update(privateKey, "utf8", "hex");
-    encrypted += cipher.final("hex");
-
-    // Combine IV and encrypted data (IV is needed for decryption)
-    return iv.toString("hex") + ":" + encrypted;
-  } catch (error) {
-    throw new Error("Encryption failed: " + error.message);
-  }
-}
-
-// Function to decrypt private key (for when you need to use the wallet)
-function decryptPrivateKey(encryptedPrivateKey) {
-  try {
-    // Split the IV and encrypted data
-    const parts = encryptedPrivateKey.split(":");
-    if (parts.length !== 2) {
-      throw new Error("Invalid encrypted data format");
-    }
-
-    const iv = Buffer.from(parts[0], "hex");
-    const encryptedData = parts[1];
-
-    // Create decipher
-    const decipher = crypto.createDecipheriv(
-      ALGORITHM,
-      Buffer.from(ENCRYPTION_KEY),
-      iv
-    );
-
-    // Decrypt the data
-    let decrypted = decipher.update(encryptedData, "hex", "utf8");
-    decrypted += decipher.final("utf8");
-
-    return decrypted;
-  } catch (error) {
-    throw new Error("Decryption failed: " + error.message);
-  }
-}
-
-// Create wallet function
-function createWallet() {
-  const wallet = ethers.Wallet.createRandom();
-  return {
-    address: wallet.address,
-    privateKey: wallet.privateKey,
-    mnemonic: wallet.mnemonic.phrase,
-  };
-}
-
-// Updated registration endpoint with automatic wallet creation
-app.post("/registration", (req, res) => {
-  const { name, number, address, role, email } = req.body;
-
-  // Validate input
-  if (!name || !number || !address || !role) {
-    return res.status(400).json({
-      success: false,
-      message: "All required fields must be filled",
-    });
-  }
-
-  // Check if user already exists (by phone number)
-  db.query(
-    "SELECT * FROM users WHERE phone_number = ?",
-    [number],
-    (err, result) => {
-      if (err) {
-        console.error("Database error:", err);
-        return res.status(500).json({
-          success: false,
-          message: "Database error occurred",
-        });
-      }
-
-      if (result.length > 0) {
-        return res.status(400).json({
-          success: false,
-          message: "User with this phone number already exists",
-        });
-      }
-
-      // Create new wallet for the user
-      try {
-        const walletInfo = createWallet();
-
-        // Encrypt the private key and mnemonic before storing
-        const encryptedPrivateKey = encryptPrivateKey(walletInfo.privateKey);
-        const encryptedMnemonic = encryptPrivateKey(walletInfo.mnemonic);
-
-        // Insert user data with generated wallet
-        const insertQuery = `
-          INSERT INTO users 
-          (name, phone_number, physical_address, role, email, public_key, encrypted_private_key, encrypted_mnemonic, role_status) 
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')
-        `;
-
-        db.query(
-          insertQuery,
-          [
-            name,
-            number,
-            address,
-            role,
-            email || null,
-            walletInfo.address,
-            encryptedPrivateKey,
-            encryptedMnemonic,
-          ],
-          (err, result) => {
-            if (err) {
-              console.error("Registration error:", err);
-              return res.status(500).json({
-                success: false,
-                message: "Registration failed. Please try again.",
-              });
-            }
-
-            console.log("New user registered:", {
-              id: result.insertId,
-              name: name,
-              walletAddress: walletInfo.address,
-              role: role,
-            });
-
-            res.json({
-              success: true,
-              message:
-                "Registration successful! Your account is pending admin approval.",
-              walletAddress: walletInfo.address,
-              userId: result.insertId,
-            });
-          }
-        );
-      } catch (walletError) {
-        console.error("Wallet creation error:", walletError);
-        return res.status(500).json({
-          success: false,
-          message: "Failed to create wallet. Please try again.",
-        });
-      }
-    }
-  );
-});
-
-// Your existing authentication endpoint (unchanged)
-// app.post("/authentication", (req, res) => {
-//   const userAccount = req.body.userAccount;
-//   console.log(userAccount, "idr to dekho");
-//   db.query(
-//     "SELECT * FROM users WHERE public_key = ? && role_status != ?",
-//     [userAccount, "pending"],
-//     (err, result) => {
-//       if (result.length > 0) {
-//         res.send(result[0].role);
-//       } else {
-//         res.send("Register yourself or wait for approval");
-//       }
-//     }
-//   );
-// });
-
 app.post("/authentication", (req, res) => {
-  const loginId = req.body.loginId; // This will be email or phone number
-  console.log(loginId, "checking authentication for");
-
-  // Check if loginId is email or phone number and query accordingly
+  const userAccount = req.body.userAccount;
+  console.log(userAccount, "idr to dekho");
   db.query(
-    "SELECT * FROM users WHERE (email = ? OR phone_number = ?) AND role_status != ?",
-    [loginId, loginId, "pending"],
+    "SELECT * FROM users WHERE public_key = ? && role_status != ?",
+    [userAccount, "pending"],
     (err, result) => {
-      if (err) {
-        console.error("Database error:", err);
-        res.status(500).send("Database error");
-        return;
-      }
-
       if (result.length > 0) {
-        console.log("User found:", result[0]);
-        res.send({
-          role: result[0].role,
-          publicKey: result[0].public_key,
-        });
+        res.send(result[0].role);
       } else {
         res.send("Register yourself or wait for approval");
       }
-    }
-  );
-});
-
-// Helper function to get user's wallet for transactions (use this in other parts of your app)
-function getUserWallet(userId, callback) {
-  db.query(
-    "SELECT encrypted_private_key FROM users WHERE id = ?",
-    [userId],
-    (err, result) => {
-      if (err || result.length === 0) {
-        return callback(err || new Error("User not found"), null);
-      }
-
-      try {
-        const decryptedPrivateKey = decryptPrivateKey(
-          result[0].encrypted_private_key
-        );
-        const wallet = new ethers.Wallet(decryptedPrivateKey);
-        callback(null, wallet);
-      } catch (decryptError) {
-        callback(decryptError, null);
-      }
-    }
-  );
-}
-
-// Function to perform transactions on behalf of users
-function performTransactionForUser(
-  userId,
-  contractAddress,
-  contractABI,
-  functionName,
-  params,
-  callback
-) {
-  getUserWallet(userId, (err, wallet) => {
-    if (err) {
-      return callback(err, null);
-    }
-
-    try {
-      // Connect to blockchain provider
-      const provider = new ethers.providers.JsonRpcProvider(
-        process.env.BLOCKCHAIN_RPC_URL
-      );
-      const walletWithProvider = wallet.connect(provider);
-
-      // Create contract instance
-      const contract = new ethers.Contract(
-        contractAddress,
-        contractABI,
-        walletWithProvider
-      );
-
-      // Call contract function
-      contract[functionName](...params)
-        .then((transaction) => transaction.wait())
-        .then((receipt) => {
-          // Log transaction
-          db.query(
-            "INSERT INTO wallet_transactions (user_id, transaction_hash, transaction_type, status) VALUES (?, ?, ?, 'success')",
-            [userId, receipt.transactionHash, functionName]
-          );
-          callback(null, receipt);
-        })
-        .catch((txError) => {
-          // Log failed transaction
-          db.query(
-            "INSERT INTO wallet_transactions (user_id, transaction_type, status, error_message) VALUES (?, ?, 'failed', ?)",
-            [userId, functionName, txError.message]
-          );
-          callback(txError, null);
-        });
-    } catch (error) {
-      callback(error, null);
-    }
-  });
-}
-
-// New endpoint to get user wallet address by user ID (for admin purposes)
-app.get("/user-wallet/:userId", (req, res) => {
-  const userId = req.params.userId;
-
-  db.query(
-    "SELECT public_key, name, role FROM users WHERE id = ?",
-    [userId],
-    (err, result) => {
-      if (err) {
-        return res.status(500).json({ error: "Database error" });
-      }
-
-      if (result.length === 0) {
-        return res.status(404).json({ error: "User not found" });
-      }
-
-      res.json({
-        walletAddress: result[0].public_key,
-        name: result[0].name,
-        role: result[0].role,
-      });
     }
   );
 });
@@ -355,6 +54,33 @@ app.post("/microfinance", (req, res) => {
         );
       } else {
         res.send("You have already taken a loan");
+      }
+    }
+  );
+});
+
+app.post("/registration", (req, res) => {
+  const userAccount = req.body.userAccount;
+  const name = req.body.name;
+  const number = req.body.number;
+  const address = req.body.address;
+  const role = req.body.role;
+  db.query(
+    "SELECT * FROM users WHERE public_key = ?",
+    [userAccount],
+    (err, result) => {
+      if (result.length > 0) {
+        res.send("User id already exists");
+      } else {
+        db.query(
+          "INSERT INTO users (public_key,role,balance,role_status,name,number,address) VALUES(?,?,?,?,?,?,?)",
+          [userAccount, role, 0, "pending", name, number, address],
+          (err, result) => {
+            if (result) {
+              res.send("Successfully regsitered. Now wait for approval");
+            }
+          }
+        );
       }
     }
   );
@@ -1329,8 +1055,6 @@ app.get("/getAllCrops", (req, res) => {
   );
 });
 
-// Start server
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(3001, () => {
+  console.log("server is running");
 });

@@ -22,14 +22,66 @@ function Welcome() {
   const [userAccount, setUserAccount] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  useEffect(() => {
+    if (window.ethereum) {
+      window.ethereum.on("chainChanged", () => {
+        window.location.reload();
+      });
+      window.ethereum.on("accountsChanged", () => {
+        window.location.reload();
+      });
+    }
+  }, []);
   const register = () => {
     navigate("/register");
   };
+  async function requestAccount() {
+    if (window.ethereum) {
+      console.log("detected");
 
-  // Function to handle login button click
+      try {
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
+        setUserAccount(accounts[0]);
+
+        Axios.post("http://localhost:3001/authentication", {
+          userAccount: accounts[0],
+        }).then((resp) => {
+          if (
+            resp.data != "farmer" &&
+            resp.data != "processor" &&
+            resp.data != "retailer" &&
+            resp.data != "consumer" &&
+            resp.data != "investor" &&
+            resp.data != "admin" &&
+            resp.data != "qualitychecker"
+          ) {
+            alert("Register yourself or wait for approval from admin");
+          } else {
+            dispatch(dbActions.role(resp.data));
+            navigate(`${resp.data}`);
+          }
+        });
+
+        dispatch(dbActions.logIn());
+        dispatch(dbActions.userAccount(accounts[0]));
+      } catch (error) {
+        console.log("Error connecting...");
+      }
+    } else {
+      alert("Meta Mask not detected");
+    }
+  }
+  const connectMetamask = async () => {
+    if (typeof window.ethereum !== "undefined") {
+      await requestAccount();
+    } else {
+      alert("No metamask Found");
+    }
+  };
   const log = () => {
-    navigate("/login");
+    connectMetamask();
   };
   return (
     <div>

@@ -7,23 +7,19 @@ from scipy import stats
 from . import data
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from . models import *
-from . serializer import *
+from .models import *
+from .serializer import *
 
 
 # Loading all Crop Recommendation Models
 
-crop_label_dict = pickle.load(
-    open("media/models/label_dictionary.pkl", "rb")
-)
-crop_knn_pipeline = pickle.load(
-    open("media/models/knn_pipeline.pkl", "rb")
-)
+crop_label_dict = pickle.load(open("media/models/label_dictionary.pkl", "rb"))
+crop_knn_pipeline = pickle.load(open("media/models/knn_pipeline.pkl", "rb"))
 
 # Loading all Fertilizer Recommendation Models
-fertilizer_xgb_pipeline = pickle.load(
-    open("media/models/fertilizer_recommendation/xgb_pipeline.pkl", "rb")
-)
+# fertilizer_xgb_pipeline = pickle.load(
+#     open("media/models/fertilizer_recommendation/xgb_pipeline.pkl", "rb")
+# )
 fertilizer_rf_pipeline = pickle.load(
     open("media/models/fertilizer_recommendation/rf_pipeline.pkl", "rb")
 )
@@ -63,24 +59,27 @@ def convert(o):
 
 def crop_prediction(input_data):
     prediction_data = []
-    prediction_data.append((crop_label_dict[
-        crop_knn_pipeline.predict(input_data)[0]
-    ], max(crop_knn_pipeline.predict_proba(input_data)[0])
-        * 100))
-    print(crop_label_dict[
-        crop_knn_pipeline.predict(input_data)[0]
-    ])
+    prediction_data.append(
+        (
+            crop_label_dict[crop_knn_pipeline.predict(input_data)[0]],
+            max(crop_knn_pipeline.predict_proba(input_data)[0]) * 100,
+        )
+    )
+    print(crop_label_dict[crop_knn_pipeline.predict(input_data)[0]])
     return prediction_data
 
 
 def fertilizer_prediction(input_data):
     prediction_data = []
-    prediction_data.append((fertilizer_label_dict[
-        fertilizer_rf_pipeline.predict(input_data)[0]
-    ], max(fertilizer_rf_pipeline.predict_proba(input_data)[0])
-        * 100))
+    prediction_data.append(
+        (
+            fertilizer_label_dict[fertilizer_rf_pipeline.predict(input_data)[0]],
+            max(fertilizer_rf_pipeline.predict_proba(input_data)[0]) * 100,
+        )
+    )
 
     return prediction_data
+
 
 # ---------------------Fertilzer Recommendation API---------------------
 
@@ -110,14 +109,15 @@ class FertilizerApiEndPoint(APIView):
 
             form_values["soil_type"] = soil_label_dict[form_values["soil_type"]]
             form_values["crop_type"] = crop_label_name_dict[form_values["crop_type"]]
-            input_data = np.asarray([float(form_values[i]) for i in column_names]).reshape(
-                1, -1
-            )
+            input_data = np.asarray(
+                [float(form_values[i]) for i in column_names]
+            ).reshape(1, -1)
             print(input_data)
             predictiondata = fertilizer_prediction(input_data)
             resultdata = data.fertilizer(predictiondata[0][0])
             print(resultdata)
             return Response(resultdata)
+
 
 # ---------------------Crop Recommendation API---------------------
 
@@ -131,11 +131,10 @@ class CropApiEndPoint(APIView):
         if serializer.is_valid():
             print(serializer.data)
             form_values = serializer.data
-            column_names = ["N", "P", "K", "temperature",
-                            "humidity", "ph", "rainfall"]
-            input_data = np.asarray([float(form_values[i].strip()) for i in column_names]).reshape(
-                1, -1
-            )
+            column_names = ["N", "P", "K", "temperature", "humidity", "ph", "rainfall"]
+            input_data = np.asarray(
+                [float(form_values[i].strip()) for i in column_names]
+            ).reshape(1, -1)
             print(input_data)
             print("hii")
             predictiondata = crop_prediction(input_data)
