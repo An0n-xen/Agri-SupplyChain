@@ -5,6 +5,8 @@ const cors = require("cors");
 const { ethers } = require("ethers");
 const crypto = require("crypto");
 require("dotenv").config({ path: "../.env" });
+const bcrypt = require("bcrypt");
+const { sendPasswordResetOTP, verifyOTP, clearOTP } = require("./emailer"); // Adjust path as needed
 
 app.use(cors());
 app.use(express.json());
@@ -16,10 +18,11 @@ const db = mysql.createConnection({
   database: "supplychain",
 });
 
-// Encryption key for storing private keys (add this to your .env file)
+const saltRounds = 12;
 // Encryption key for storing private keys (add this to your .env file)
 const ENCRYPTION_KEY_STRING =
   process.env.WALLET_ENCRYPTION_KEY || "your-32-character-secret-key-here!!";
+
 const ENCRYPTION_KEY = crypto
   .createHash("sha256")
   .update(ENCRYPTION_KEY_STRING)
@@ -88,146 +91,6 @@ function createWallet() {
     mnemonic: wallet.mnemonic.phrase,
   };
 }
-
-// Updated registration endpoint with automatic wallet creation
-app.post("/registration", (req, res) => {
-  const { name, number, address, role, email } = req.body;
-
-  // Validate input
-  if (!name || !number || !address || !role) {
-    return res.status(400).json({
-      success: false,
-      message: "All required fields must be filled",
-    });
-  }
-
-  // Check if user already exists (by phone number)
-  db.query(
-    "SELECT * FROM users WHERE phone_number = ?",
-    [number],
-    (err, result) => {
-      if (err) {
-        console.error("Database error:", err);
-        return res.status(500).json({
-          success: false,
-          message: "Database error occurred",
-        });
-      }
-
-      if (result.length > 0) {
-        return res.status(400).json({
-          success: false,
-          message: "User with this phone number already exists",
-        });
-      }
-
-      // Create new wallet for the user
-      try {
-        const walletInfo = createWallet();
-
-        // Encrypt the private key and mnemonic before storing
-        const encryptedPrivateKey = encryptPrivateKey(walletInfo.privateKey);
-        const encryptedMnemonic = encryptPrivateKey(walletInfo.mnemonic);
-
-        // Insert user data with generated wallet
-        const insertQuery = `
-          INSERT INTO users 
-          (name, phone_number, physical_address, role, email, public_key, encrypted_private_key, encrypted_mnemonic, role_status) 
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')
-        `;
-
-        db.query(
-          insertQuery,
-          [
-            name,
-            number,
-            address,
-            role,
-            email || null,
-            walletInfo.address,
-            encryptedPrivateKey,
-            encryptedMnemonic,
-          ],
-          (err, result) => {
-            if (err) {
-              console.error("Registration error:", err);
-              return res.status(500).json({
-                success: false,
-                message: "Registration failed. Please try again.",
-              });
-            }
-
-            console.log("New user registered:", {
-              id: result.insertId,
-              name: name,
-              walletAddress: walletInfo.address,
-              role: role,
-            });
-
-            res.json({
-              success: true,
-              message:
-                "Registration successful! Your account is pending admin approval.",
-              walletAddress: walletInfo.address,
-              userId: result.insertId,
-            });
-          }
-        );
-      } catch (walletError) {
-        console.error("Wallet creation error:", walletError);
-        return res.status(500).json({
-          success: false,
-          message: "Failed to create wallet. Please try again.",
-        });
-      }
-    }
-  );
-});
-
-// Your existing authentication endpoint (unchanged)
-// app.post("/authentication", (req, res) => {
-//   const userAccount = req.body.userAccount;
-//   console.log(userAccount, "idr to dekho");
-//   db.query(
-//     "SELECT * FROM users WHERE public_key = ? && role_status != ?",
-//     [userAccount, "pending"],
-//     (err, result) => {
-//       if (result.length > 0) {
-//         res.send(result[0].role);
-//       } else {
-//         res.send("Register yourself or wait for approval");
-//       }
-//     }
-//   );
-// });
-
-app.post("/authentication", (req, res) => {
-  const loginId = req.body.loginId; // This will be email or phone number
-  console.log(loginId, "checking authentication for");
-
-  // Check if loginId is email or phone number and query accordingly
-  db.query(
-    "SELECT * FROM users WHERE (email = ? OR phone_number = ?) AND role_status != ?",
-    [loginId, loginId, "pending"],
-    (err, result) => {
-      if (err) {
-        console.error("Database error:", err);
-        res.status(500).send("Database error");
-        return;
-      }
-
-      if (result.length > 0) {
-        console.log("User found:", result[0]);
-        res.send({
-          role: result[0].role,
-          publicKey: result[0].public_key,
-        });
-      } else {
-        res.send("Register yourself or wait for approval");
-      }
-    }
-  );
-});
 
 // Helper function to get user's wallet for transactions (use this in other parts of your app)
 function getUserWallet(userId, callback) {
@@ -304,6 +167,286 @@ function performTransactionForUser(
     }
   });
 }
+
+// Updated registration endpoint with automatic wallet creation
+app.post("/registration", async (req, res) => {
+  const { name, number, address, role, email, password } = req.body;
+
+  // Validate input
+  if (!name || !number || !address || !role || !email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "All required fields must be filled",
+    });
+  }
+
+  try {
+    // Check if user already exists (by phone number)
+    const existingUser = await new Promise((resolve, reject) => {
+      db.query(
+        "SELECT * FROM users WHERE phone_number = ?",
+        [number],
+        (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        }
+      );
+    });
+
+    if (existingUser.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "User with this phone number already exists",
+      });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create new wallet for the user
+    const walletInfo = createWallet();
+
+    // Encrypt the private key and mnemonic before storing
+    const encryptedPrivateKey = encryptPrivateKey(walletInfo.privateKey);
+    const encryptedMnemonic = encryptPrivateKey(walletInfo.mnemonic);
+
+    // Insert user data with generated wallet and hashed password
+    const insertQuery = `
+      INSERT INTO users 
+      (name, phone_number, physical_address, role, email, password, public_key, encrypted_private_key, encrypted_mnemonic, role_status) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+    `;
+
+    const insertResult = await new Promise((resolve, reject) => {
+      db.query(
+        insertQuery,
+        [
+          name,
+          number,
+          address,
+          role,
+          email,
+          hashedPassword,
+          walletInfo.address,
+          encryptedPrivateKey,
+          encryptedMnemonic,
+        ],
+        (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        }
+      );
+    });
+
+    console.log("New user registered:", {
+      id: insertResult.insertId,
+      name: name,
+      walletAddress: walletInfo.address,
+      role: role,
+    });
+
+    res.json({
+      success: true,
+      message:
+        "Registration successful! Your account is pending admin approval.",
+      walletAddress: walletInfo.address,
+      userId: insertResult.insertId,
+    });
+  } catch (error) {
+    console.error("Registration error:", error);
+
+    if (error.message && error.message.includes("wallet")) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to create wallet. Please try again.",
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Registration failed. Please try again.",
+    });
+  }
+});
+
+app.post("/authentication", async (req, res) => {
+  const loginId = req.body.loginId; // This will be email or phone number
+  const password = req.body.password;
+
+  console.log(loginId, "checking authentication for");
+
+  // Validate input
+  if (!loginId || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "Login ID and password are required",
+    });
+  }
+
+  try {
+    // Check if loginId is email or phone number and query accordingly
+    const users = await new Promise((resolve, reject) => {
+      db.query(
+        "SELECT * FROM users WHERE (email = ? OR phone_number = ?) AND role_status != ?",
+        [loginId, loginId, "pending"],
+        (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        }
+      );
+    });
+
+    if (users.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials or account pending approval",
+      });
+    }
+
+    const user = users[0];
+    console.log("User found:", {
+      id: user.id,
+      name: user.name,
+      role: user.role,
+    });
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    // Password is valid, return user data
+    console.log("Authentication successful for user:", user.name);
+
+    res.send({
+      role: user.role,
+      publicKey: user.public_key,
+    });
+  } catch (error) {
+    console.error("Authentication error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Authentication failed. Please try again.",
+    });
+  }
+});
+
+const getUserByEmailOrPhone = async (loginId) => {
+  return new Promise((resolve, reject) => {
+    db.query(
+      "SELECT * FROM users WHERE email = ? OR phone_number = ?",
+      [loginId, loginId],
+      (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result.length > 0 ? result[0] : null);
+        }
+      }
+    );
+  });
+};
+
+// Send OTP route
+app.post("/forgot-password/send-code", async (req, res) => {
+  const { loginId } = req.body;
+
+  console.log("Sending OTP to:", loginId);
+
+  try {
+    // First check if user exists and get their email
+    const user = await getUserByEmailOrPhone(loginId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    await sendPasswordResetOTP(user.email, user.name);
+
+    res.json({
+      success: true,
+      message: "Verification code sent to your email",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to send verification code",
+    });
+  }
+});
+
+// Verify OTP route
+app.post("/forgot-password/verify-code", async (req, res) => {
+  const { loginId, code } = req.body;
+
+  try {
+    const user = await getUserByEmailOrPhone(loginId);
+    const result = verifyOTP(user.email, code);
+
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Verification failed",
+    });
+  }
+});
+
+// Verify OTP route
+app.post("/forgot-password/reset-password", async (req, res) => {
+  const { loginId, code, newPassword } = req.body;
+
+  try {
+    const user = await getUserByEmailOrPhone(loginId);
+    // const result = verifyOTP(user.email, code);
+
+    // if (result.success) {
+    //   res.json(result);
+    // } else {
+    //   res.status(400).json(result);
+    // }
+
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update user's password in the database
+    db.query(
+      "UPDATE users SET password = ? WHERE email = ? OR phone_number = ?",
+      [hashedPassword, user.email, user.phone_number],
+      (err, result) => {
+        if (err) {
+          return res.status(500).json({
+            success: false,
+            message: "Failed to reset password",
+          });
+        }
+
+        // Clear OTP after successful password reset
+        clearOTP(user.email);
+
+        res.json({
+          success: true,
+          message: "Password reset successfully",
+        });
+      }
+    );
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Verification failed",
+    });
+  }
+});
 
 // New endpoint to get user wallet address by user ID (for admin purposes)
 app.get("/user-wallet/:userId", (req, res) => {

@@ -10,6 +10,7 @@ function Registration() {
   const [no, setNo] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
+  const [password, setPassword] = useState("");
   const [role, setRole] = useState("farmer");
   const [isRegistering, setIsRegistering] = useState(false);
 
@@ -33,6 +34,10 @@ function Registration() {
     setEmail(e.target.value);
   };
 
+  const passwordF = (e) => {
+    setPassword(e.target.value);
+  };
+
   const register = async (e) => {
     e.preventDefault();
     setIsRegistering(true);
@@ -44,6 +49,7 @@ function Registration() {
         address: address,
         role: role,
         email: email,
+        password: password,
       });
 
       // Send registration data to backend - wallet will be created there
@@ -53,6 +59,7 @@ function Registration() {
         address: address,
         role: role,
         email: email,
+        password: password,
       });
 
       console.log("Registration response:", response.data);
@@ -158,6 +165,20 @@ function Registration() {
                   placeholder="Enter your email address"
                   required
                   onChange={emailF}
+                  disabled={isRegistering}
+                />
+              </div>
+
+              <label className={"label-r"}> Password:</label>
+              <div className="input-group input-group-outline mb-3 ">
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  className="form-control"
+                  placeholder="Enter your password"
+                  required
+                  onChange={passwordF}
                   disabled={isRegistering}
                 />
               </div>
