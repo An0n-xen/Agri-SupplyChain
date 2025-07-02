@@ -28,6 +28,7 @@ import TrackStatus from "./utils/TrackStatus";
 import Admin from "./components/admin/Admin";
 import Registration from "./utils/Registration";
 import Login from "./utils/Login";
+import ForgotPassword from "./utils/Forgot-password";
 import Verification from "./components/admin/Verification";
 import InvestorHome from "./components/investor/InvestorHome";
 import Farmer from "./components/investor/Farmer";
@@ -53,6 +54,7 @@ function App() {
         {/* Registration screen */}
         <Route path="/register" element={<Registration />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route element={<ProtectedRoutes />}>
           {/* Admin panel */}
           <Route path="/admin" element={<Admin />} />
