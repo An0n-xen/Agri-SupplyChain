@@ -1,29 +1,27 @@
-import React, { useEffect, useState } from 'react'
-import SubNav from '../../utils/SubNav'
-import ProcessorSidebar from './ProcessorSidebar'
-import processor from '../../images/producer.png'
-import { useSelector } from 'react-redux'
-import axios from 'axios'
+import React, { useEffect, useState } from "react";
+import SubNav from "../../utils/SubNav";
+import ProcessorSidebar from "./ProcessorSidebar";
+import processor from "../../images/producer.png";
+import { useSelector } from "react-redux";
+import axios from "axios";
 
 function ProcessorDashboard() {
-
   const id = useSelector((state) => state.db.userAcc);
   const [result, setResult] = useState([]);
 
   useEffect(() => {
-    axios.get(`http://localhost:3001/getUser/${id}`)
-      .then((response) => {
-        setResult(response.data[0]);
-      })
-  })
+    axios.get(`http://localhost:3001/getUser/${id}`).then((response) => {
+      setResult(response.data[0]);
+    });
+  });
 
   return (
-    <div className='home-body'>
-      <div className='left-body'>
-        <ProcessorSidebar dash='1'></ProcessorSidebar>
+    <div className="home-body">
+      <div className="left-body">
+        <ProcessorSidebar dash="1"></ProcessorSidebar>
       </div>
-      <div className='right-body'>
-        <SubNav heading='Dashboard'></SubNav>
+      <div className="right-body">
+        <SubNav heading="Dashboard"></SubNav>
         <section className="sectiona about-section gray-bga" id="about">
           <div className="container">
             <div className="row align-items-center flex-row-reverse">
@@ -31,7 +29,13 @@ function ProcessorDashboard() {
                 <div className="about-text go-to">
                   <h3 className="dark-color">Hello, {result.name}!</h3>
                   <h6 className="theme-color lead"> Occupation: Processor</h6>
-                  <p>I <mark>manufacture</mark> products using raw materials and industrial techniques. I am involved in processing the raw materials for use in other industries, such as paper processing for the printing industry or oil processing for the energy industry.</p>
+                  <p>
+                    I <mark>manufacture</mark> products using raw materials and
+                    industrial techniques. I am involved in processing the raw
+                    materials for use in other industries, such as paper
+                    processing for the printing industry or oil processing for
+                    the energy industry.
+                  </p>
                   <div className="row about-list">
                     <div className="col-md-5">
                       <div className="media">
@@ -40,7 +44,7 @@ function ProcessorDashboard() {
                       </div>
                       <div className="media">
                         <label>Address</label>
-                        <p>{result.address}</p>
+                        <p>{result.physical_address}</p>
                       </div>
                     </div>
                     <div className="col-md-9">
@@ -50,7 +54,7 @@ function ProcessorDashboard() {
                       </div>
                       <div className="media">
                         <label>Phone</label>
-                        <p>{result.number}</p>
+                        <p>{result.phone_number}</p>
                       </div>
                     </div>
                   </div>
@@ -58,7 +62,7 @@ function ProcessorDashboard() {
               </div>
               <div className="col-lg-5">
                 <div className="about-avatar">
-                  <img className='imga' src={processor} title="" alt="" />
+                  <img className="imga" src={processor} title="" alt="" />
                 </div>
               </div>
             </div>
@@ -94,7 +98,7 @@ function ProcessorDashboard() {
         </section>
       </div>
     </div>
-  )
+  );
 }
 
-export default ProcessorDashboard
+export default ProcessorDashboard;

@@ -8,7 +8,7 @@ import { ethers } from "ethers";
 import { Logger } from "ethers/lib/utils";
 
 function ProcessorRequestCard(props) {
-  const { crop, processor, rquantity, qprice, id, crop_id } = props;
+  const { crop, processor, rquantity, qprice, id, crop_id, crop_buyer } = props;
 
   const dispatch = useDispatch();
   const paymentAddress = useSelector((state) => state.db.address);
@@ -22,26 +22,55 @@ function ProcessorRequestCard(props) {
     dispatch(dbActions.reload());
   };
 
-  const insureHandler = async (e) => {
-    if (typeof window.ethereum !== "undefined" && acc != "") {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(paymentAddress, Payment.abi, signer);
-      const id = crop_id;
-      const data = await contract.updateStatus(id);
-      console.log(data);
+  const getPrivateKey = async (publicKey) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/user/private-key/${publicKey}`
+      );
 
-      await axios
-        .put(`http://localhost:3001/insure/${id}/${crop_id}`, {
-          name: crop,
-          quantity: rquantity,
-        })
-        .then((resp) => {
-          console.log(resp.data);
-          alert(resp.data);
-        });
-      dispatch(dbActions.reload());
+      if (response.data.success) {
+        return response.data.privateKey;
+      } else {
+        throw new Error(response.data.message || "Failed to get private key");
+      }
+    } catch (error) {
+      console.error("Error fetching private key:", error);
+      throw error;
     }
+  };
+
+  const insureHandler = async (e) => {
+    // const provider = new ethers.providers.Web3Provider(window.ethereum);
+    // const signer = provider.getSigner();
+    // const contract = new ethers.Contract(paymentAddress, Payment.abi, signer);
+    // const id = crop_id;
+    // const data = await contract.updateStatus(id);
+    // console.log(data);
+
+    // const privateKey = await getPrivateKey(crop_buyer);
+    // console.log("Private Key:", privateKey);
+
+    // const provider = new ethers.providers.JsonRpcProvider(
+    //   "https://mainnet.infura.io/v3/060dd4434e504cc68127ca4a9cdcbe2c"
+    // );
+    // const wallet = new ethers.Wallet(privateKey, provider);
+
+    // const contract = new ethers.Contract(paymentAddress, Payment.abi, wallet);
+
+    // const id = crop_id;
+    // const data = await contract.updateStatus(id);
+    // console.log(data);
+
+    await axios
+      .put(`http://localhost:3001/insure/${id}/${crop_id}`, {
+        name: crop,
+        quantity: rquantity,
+      })
+      .then((resp) => {
+        console.log(resp.data);
+        alert(resp.data);
+      });
+    dispatch(dbActions.reload());
   };
   return (
     <div className="col-5 mb-xl-5 mb-4">
@@ -76,7 +105,7 @@ function ProcessorRequestCard(props) {
               <span className="text-success text-sm font-weight-bolder">
                 Quoted Price :
               </span>
-              &nbsp;&nbsp;₹{qprice}&nbsp;&nbsp;&nbsp;&nbsp;
+              &nbsp;&nbsp;Ghc{qprice}&nbsp;&nbsp;&nbsp;&nbsp;
             </p>
           </div>
           <div className="row">

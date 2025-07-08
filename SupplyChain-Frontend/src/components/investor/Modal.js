@@ -63,7 +63,7 @@ function Modal(props) {
               id="amount"
               name="amount"
               class="form-control"
-              placeholder="Enter Amount in ₹"
+              placeholder="Enter Amount in Ghc"
               required
               onChange={amountHandler}
             />

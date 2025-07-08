@@ -75,7 +75,7 @@ function PreviousPurchases() {
         </td>
 
         <td>
-          <p className="text-xs font-weight-bold mb-0">₹ {d.price}</p>
+          <p className="text-xs font-weight-bold mb-0">Ghc {d.price}</p>
         </td>
         <td className="align-middle text-center text-sm">
           <h6 className="mb-0 text-sm">{d.quantity}</h6>

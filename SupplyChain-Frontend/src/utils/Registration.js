@@ -208,9 +208,9 @@ function Registration() {
                 <option value="farmer">Farmer</option>
                 <option value="processor">Processor</option>
                 <option value="retailer">Retailer</option>
-                <option value="consumer">Consumer</option>
+                {/* <option value="consumer">Consumer</option>
                 <option value="investor">Investor</option>
-                <option value="qualitychecker">Quality Checker</option>
+                <option value="qualitychecker">Quality Checker</option> */}
               </select>
 
               <div

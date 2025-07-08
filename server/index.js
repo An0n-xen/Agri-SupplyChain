@@ -168,6 +168,46 @@ function performTransactionForUser(
   });
 }
 
+app.get("/user/private-key/:public_key", async (req, res) => {
+  const { public_key } = req.params;
+
+  try {
+    const user = await new Promise((resolve, reject) => {
+      db.query(
+        "SELECT encrypted_private_key FROM users WHERE public_key = ?",
+        [public_key],
+        (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        }
+      );
+    });
+
+    if (user.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Decrypt the private key
+    const decryptedPrivateKey = decryptPrivateKey(
+      user[0].encrypted_private_key
+    );
+
+    res.json({
+      success: true,
+      privateKey: decryptedPrivateKey,
+    });
+  } catch (error) {
+    console.error("Error fetching private key:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching private key",
+    });
+  }
+});
+
 // Updated registration endpoint with automatic wallet creation
 app.post("/registration", async (req, res) => {
   const { name, number, address, role, email, password } = req.body;
@@ -214,7 +254,7 @@ app.post("/registration", async (req, res) => {
     const insertQuery = `
       INSERT INTO users 
       (name, phone_number, physical_address, role, email, password, public_key, encrypted_private_key, encrypted_mnemonic, role_status) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'approved')
     `;
 
     const insertResult = await new Promise((resolve, reject) => {
@@ -409,13 +449,6 @@ app.post("/forgot-password/reset-password", async (req, res) => {
 
   try {
     const user = await getUserByEmailOrPhone(loginId);
-    // const result = verifyOTP(user.email, code);
-
-    // if (result.success) {
-    //   res.json(result);
-    // } else {
-    //   res.status(400).json(result);
-    // }
 
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
@@ -855,6 +888,7 @@ app.put("/insure/:id/:crop_id", (req, res) => {
     }
   );
 });
+
 app.get("/processorBids/:id", (req, res) => {
   const id = req.params["id"];
   db.query(
@@ -870,6 +904,7 @@ app.get("/processorBids/:id", (req, res) => {
     }
   );
 });
+
 app.get("/qualityC", (req, res) => {
   db.query(
     "SELECT * FROM insurance WHERE status = ? ORDER BY id DESC",
@@ -884,6 +919,7 @@ app.get("/qualityC", (req, res) => {
     }
   );
 });
+
 app.get("/farmerbrodcastcall/:id", (req, res) => {
   const id = req.params["id"];
   db.query(

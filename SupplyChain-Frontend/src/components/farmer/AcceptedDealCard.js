@@ -46,7 +46,7 @@ function AcceptedDealCard(props) {
               <span className="text-success text-sm font-weight-bolder">
                 Received Amount :
               </span>
-              &nbsp;&nbsp;₹ {price}&nbsp;&nbsp;&nbsp;&nbsp;
+              &nbsp;&nbsp;Ghc {price}&nbsp;&nbsp;&nbsp;&nbsp;
             </p>
           </div>
         </div>

@@ -35,6 +35,7 @@ function ProcessorRequest() {
         qprice={d.bid_price}
         id={d.id}
         crop_id={d.crop_id}
+        crop_buyer={d.buyer}
       ></ProcessorRequestCard>
     );
   });
@@ -49,7 +50,9 @@ function ProcessorRequest() {
         <div className="broadcast-body">
           <h3>Your Processor Requests!</h3>
           <div className="container-fluid py-4">
-            <div className="row">{list.length === 0 ? <p>No processor request yet...</p> : list}</div>
+            <div className="row">
+              {list.length === 0 ? <p>No processor request yet...</p> : list}
+            </div>
           </div>
         </div>
       </div>

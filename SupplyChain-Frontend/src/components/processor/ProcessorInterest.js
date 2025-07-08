@@ -51,7 +51,7 @@ function ProcessorInterest() {
           </div>
         </td>
         <td>
-          <p className="text-xs font-weight-bold mb-0">₹ {element.price}</p>
+          <p className="text-xs font-weight-bold mb-0">Ghc {element.price}</p>
         </td>
         <td className="align-middle text-center text-sm">
           <h6 className="mb-0 text-sm">{element.quantity}</h6>

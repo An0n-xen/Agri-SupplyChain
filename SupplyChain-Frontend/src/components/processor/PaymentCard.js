@@ -161,7 +161,7 @@ function PaymentCard(props) {
               <span className="text-success text-sm font-weight-bolder">
                 Expected Price :
               </span>
-              &nbsp;&nbsp;₹{eprice}&nbsp;&nbsp;&nbsp;&nbsp;
+              &nbsp;&nbsp;Ghc{eprice}&nbsp;&nbsp;&nbsp;&nbsp;
             </p>
           </div>
           <div className="card-footer p-2">
@@ -177,7 +177,7 @@ function PaymentCard(props) {
               <span className="text-success text-sm font-weight-bolder">
                 Quoted Price :
               </span>
-              &nbsp;&nbsp;₹{qprice}&nbsp;&nbsp;&nbsp;&nbsp;
+              &nbsp;&nbsp;Ghc{qprice}&nbsp;&nbsp;&nbsp;&nbsp;
             </p>
           </div>
           <div class="text-center mb-1">
@@ -187,7 +187,7 @@ function PaymentCard(props) {
               class="btn btn-lg bg-gradient-success btn-lg w-100 mt-4 mb-0"
               onClick={payment}
             >
-              Pay ₹{qprice}
+              Pay Ghc{qprice}
             </button>
           </div>
           <div class="text-center mb-1">

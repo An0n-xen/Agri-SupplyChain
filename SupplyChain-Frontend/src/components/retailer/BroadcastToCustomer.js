@@ -118,7 +118,7 @@ function BroadcastToCustomer() {
                       id="temperature"
                       name="temperature"
                       class="form-control"
-                      placeholder="Price (in ₹)"
+                      placeholder="Price (in Ghc)"
                       required
                       value={price}
                       onChange={priceHandler}

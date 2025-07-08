@@ -88,7 +88,7 @@ function Broadcast() {
                       id="temperature"
                       name="temperature"
                       class="form-control"
-                      placeholder="Expected Price (in ₹)"
+                      placeholder="Expected Price (in Ghc)"
                       step="1"
                       min="1"
                       onChange={priceH}
