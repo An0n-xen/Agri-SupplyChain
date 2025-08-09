@@ -54,7 +54,7 @@ function InvestmentDealCard(props) {
               <span className="text-success text-sm font-weight-bolder">
                 Price :
               </span>
-              &nbsp;&nbsp;₹ {price}&nbsp;&nbsp;&nbsp;&nbsp;
+              &nbsp;&nbsp;GH₵ {price}&nbsp;&nbsp;&nbsp;&nbsp;
             </p>
           </div>
           <div className="card-footer p-2">
@@ -70,7 +70,7 @@ function InvestmentDealCard(props) {
               <span className="text-success text-sm font-weight-bolder">
                 Investment Amount :
               </span>
-              &nbsp;&nbsp;₹ {amount}&nbsp;&nbsp;&nbsp;&nbsp;
+              &nbsp;&nbsp;GH₵ {amount}&nbsp;&nbsp;&nbsp;&nbsp;
             </p>
           </div>
           <div className="card-footer p-2">

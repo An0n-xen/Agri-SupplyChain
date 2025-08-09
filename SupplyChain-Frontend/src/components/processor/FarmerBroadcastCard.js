@@ -54,7 +54,7 @@ function FarmerBroadcastCard(props) {
                 <span className="text-success text-sm font-weight-bolder">
                   Expected Price :
                 </span>
-                &nbsp;&nbsp;₹{price}&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;GH₵{price}&nbsp;&nbsp;&nbsp;&nbsp;
               </p>
             </div>
             <div className="card-footer p-2">

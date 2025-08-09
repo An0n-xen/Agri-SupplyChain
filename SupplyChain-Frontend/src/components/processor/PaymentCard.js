@@ -7,7 +7,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { dbActions } from "../../store/dbSlice";
 
 function PaymentCard(props) {
-  const { name, eprice, requestedQuantity, qprice, lotId, crop_name } = props;
+  const {
+    name,
+    eprice,
+    requestedQuantity,
+    qprice,
+    lotId,
+    crop_name,
+    buyer_email,
+  } = props;
   const [result, setResult] = useState("");
   const [d, setD] = useState(false);
   const [price, setPrice] = useState(0);
@@ -72,46 +80,111 @@ function PaymentCard(props) {
     return score;
   };
 
+  // const payment = async (e) => {
+  //   await axios
+  //     .post(`http://localhost:3001/paid`, {
+  //       crop_name: crop_name,
+  //       qprice: qprice,
+  //       lotId: lotId,
+  //       buyer: id,
+  //       seller: name,
+  //       quantity: requestedQuantity,
+  //     })
+  //     .then((resp) => {
+  //       console.log(resp.data);
+  //     });
+  //   await creditScore();
+  //   dispatch(dbActions.reload());
+  // };
+
   const payment = async (e) => {
-    // pay karo
-
-    const fin = qprice / price;
-    // const fin2 = ethers.utils.parseEther(`${fin}`.toString());
-    console.log(fin);
-    const fin2 = Number(fin).toFixed(18);
-    if (typeof window.ethereum !== "undefined" && id != "") {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-
-      const tx = {
-        from: id,
-        to: name,
-        value: ethers.utils.parseEther(`${fin2}`),
-      };
-      await signer.sendTransaction(tx).then((transaction) => {
-        console.dir(transaction);
-        alert("Payment Done!");
+    e.preventDefault(); // Prevent default form submission if needed
+    console.log("email", buyer_email);
+    try {
+      const response = await axios.post(`http://localhost:3001/paid`, {
+        crop_name: crop_name,
+        qprice: qprice,
+        lotId: lotId,
+        buyer: id,
+        seller: name,
+        quantity: requestedQuantity,
+        email: buyer_email,
       });
 
-      const contract = new ethers.Contract(paymentAddress, Payment.abi, signer);
+      console.log(response.data);
 
-      const data = await contract.updateStatus(lotId);
-      await axios
-        .post(`http://localhost:3001/paid`, {
-          crop_name: crop_name,
-          qprice: qprice,
-          lotId: lotId,
-          buyer: id,
-          seller: name,
-          quantity: requestedQuantity,
-        })
-        .then((resp) => {
-          console.log(resp.data);
-        });
-      await creditScore();
-      dispatch(dbActions.reload());
+      // Check if payment initialization was successful
+      if (response.data.success && response.data.data.authorization_url) {
+        // Store the payment reference for later verification
+        localStorage.setItem(
+          "paystack_reference",
+          response.data.data.reference
+        );
+        localStorage.setItem(
+          "payment_data",
+          JSON.stringify({
+            crop_name,
+            qprice,
+            lotId,
+            buyer: id,
+            seller: name,
+            quantity: requestedQuantity,
+          })
+        );
+
+        // Redirect to Paystack payment page
+        window.location.href = response.data.data.authorization_url;
+      } else {
+        // Handle error case
+        console.error("Payment initialization failed:", response.data.message);
+        alert("Payment initialization failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      alert("An error occurred while processing payment. Please try again.");
     }
   };
+
+  // const payment = async (e) => {
+  //   // pay karo
+
+  //   const fin = qprice / price;
+  //   // const fin2 = ethers.utils.parseEther(`${fin}`.toString());
+  //   console.log(fin);
+  //   const fin2 = Number(fin).toFixed(18);
+  //   if (typeof window.ethereum !== "undefined" && id != "") {
+  //     const provider = new ethers.providers.Web3Provider(window.ethereum);
+  //     const signer = provider.getSigner();
+
+  //     const tx = {
+  //       from: id,
+  //       to: name,
+  //       value: ethers.utils.parseEther(`${fin2}`),
+  //     };
+  //     await signer.sendTransaction(tx).then((transaction) => {
+  //       console.dir(transaction);
+  //       alert("Payment Done!");
+  //     });
+
+  //     const contract = new ethers.Contract(paymentAddress, Payment.abi, signer);
+
+  //     const data = await contract.updateStatus(lotId);
+  //     await axios
+  //       .post(`http://localhost:3001/paid`, {
+  //         crop_name: crop_name,
+  //         qprice: qprice,
+  //         lotId: lotId,
+  //         buyer: id,
+  //         seller: name,
+  //         quantity: requestedQuantity,
+  //       })
+  //       .then((resp) => {
+  //         console.log(resp.data);
+  //       });
+  //     await creditScore();
+  //     dispatch(dbActions.reload());
+  //   }
+  // };
 
   const showReport = async () => {
     await axios
@@ -161,7 +234,7 @@ function PaymentCard(props) {
               <span className="text-success text-sm font-weight-bolder">
                 Expected Price :
               </span>
-              &nbsp;&nbsp;₹{eprice}&nbsp;&nbsp;&nbsp;&nbsp;
+              &nbsp;&nbsp;GH₵ {eprice}&nbsp;&nbsp;&nbsp;&nbsp;
             </p>
           </div>
           <div className="card-footer p-2">
@@ -177,7 +250,7 @@ function PaymentCard(props) {
               <span className="text-success text-sm font-weight-bolder">
                 Quoted Price :
               </span>
-              &nbsp;&nbsp;₹{qprice}&nbsp;&nbsp;&nbsp;&nbsp;
+              &nbsp;&nbsp;GH₵ {qprice}&nbsp;&nbsp;&nbsp;&nbsp;
             </p>
           </div>
           <div class="text-center mb-1">
@@ -187,7 +260,7 @@ function PaymentCard(props) {
               class="btn btn-lg bg-gradient-success btn-lg w-100 mt-4 mb-0"
               onClick={payment}
             >
-              Pay ₹{qprice}
+              Pay GH₵ {qprice}
             </button>
           </div>
           <div class="text-center mb-1">

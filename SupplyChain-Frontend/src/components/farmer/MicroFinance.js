@@ -94,7 +94,7 @@ function MicroFinance() {
                       id="temperature"
                       name="temperature"
                       class="form-control"
-                      placeholder="Expected Price (in ₹)"
+                      placeholder="Expected Price (in GH₵)"
                       required
                       value={price}
                       onChange={priceHandler}

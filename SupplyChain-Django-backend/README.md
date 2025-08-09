@@ -1,1 +1,0 @@
-# SupplyChain-Django-backend

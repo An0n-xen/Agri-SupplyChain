@@ -46,8 +46,9 @@ function Sidebar(props) {
             <li className="nav-item nav-tile">
               <Link to="/farmer">
                 <a
-                  className={`nav-link text-white ${dash ? "active bg-gradient-success" : ""
-                    }`}
+                  className={`nav-link text-white ${
+                    dash ? "active bg-gradient-success" : ""
+                  }`}
                 >
                   <div className="text-white text-center me-2 d-flex align-items-center justify-content-center">
                     <i className="material-icons opacity-10">dashboard</i>
@@ -62,38 +63,11 @@ function Sidebar(props) {
               </h6>
             </li>
             <li className="nav-item nav-tile">
-              <Link to="/farmer/predictions">
-                <a
-                  className={`nav-link text-white ${pred ? "active bg-gradient-success" : ""
-                    }`}
-                >
-                  <div className="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                    <i className="material-icons opacity-10">table_view</i>
-                  </div>
-                  <span className="nav-link-text ms-1">
-                    Crop Price Predictor
-                  </span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item nav-tile">
-              <Link to="/farmer/recommendations">
-                <a
-                  className={`nav-link text-white ${rec ? "active bg-gradient-success" : ""
-                    }`}
-                >
-                  <div className="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                    <i className="material-icons opacity-10">table_view</i>
-                  </div>
-                  <span className="nav-link-text ms-1">Recommendations</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item nav-tile">
               <Link to="/farmer/broadcast">
                 <a
-                  className={`nav-link text-white ${broad ? "active bg-gradient-success" : ""
-                    }`}
+                  className={`nav-link text-white ${
+                    broad ? "active bg-gradient-success" : ""
+                  }`}
                 >
                   <div className="text-white text-center me-2 d-flex align-items-center justify-content-center">
                     <i className="material-icons opacity-10">table_view</i>
@@ -105,8 +79,9 @@ function Sidebar(props) {
             <li className="nav-item nav-tile">
               <Link to="/farmer/farmerbroadcast">
                 <a
-                  className={`nav-link text-white ${farmbroad ? "active bg-gradient-success" : ""
-                    }`}
+                  className={`nav-link text-white ${
+                    farmbroad ? "active bg-gradient-success" : ""
+                  }`}
                 >
                   <div className="text-white text-center me-2 d-flex align-items-center justify-content-center">
                     <i className="material-icons opacity-10">table_view</i>
@@ -118,8 +93,9 @@ function Sidebar(props) {
             <li className="nav-item nav-tile">
               <Link to="/farmer/status">
                 <a
-                  className={`nav-link text-white ${status ? "active bg-gradient-success" : ""
-                    }`}
+                  className={`nav-link text-white ${
+                    status ? "active bg-gradient-success" : ""
+                  }`}
                 >
                   <div className="text-white text-center me-2 d-flex align-items-center justify-content-center">
                     <i className="material-icons opacity-10">table_view</i>
@@ -131,8 +107,9 @@ function Sidebar(props) {
             <li className="nav-item nav-tile">
               <Link to="/farmer/transactions">
                 <a
-                  className={`nav-link text-white ${trans ? "active bg-gradient-success" : ""
-                    }`}
+                  className={`nav-link text-white ${
+                    trans ? "active bg-gradient-success" : ""
+                  }`}
                 >
                   <div className="text-white text-center me-2 d-flex align-items-center justify-content-center">
                     <i className="material-icons opacity-10">table_view</i>
@@ -142,36 +119,11 @@ function Sidebar(props) {
               </Link>
             </li>
             <li className="nav-item nav-tile">
-              <Link to="/farmer/microfinance">
-                <a
-                  className={`nav-link text-white ${micro ? "active bg-gradient-success" : ""
-                    }`}
-                >
-                  <div className="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                    <i className="material-icons opacity-10">table_view</i>
-                  </div>
-                  <span className="nav-link-text ms-1">Micro Finance</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item nav-tile">
-              <Link to="/farmer/payback">
-                <a
-                  className={`nav-link text-white ${payback ? "active bg-gradient-success" : ""
-                    }`}
-                >
-                  <div className="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                    <i className="material-icons opacity-10">table_view</i>
-                  </div>
-                  <span className="nav-link-text ms-1">Payback</span>
-                </a>
-              </Link>
-            </li>
-            <li className="nav-item nav-tile">
               <Link to="/farmer/processorRequests">
                 <a
-                  className={`nav-link text-white ${proreq ? "active bg-gradient-success" : ""
-                    }`}
+                  className={`nav-link text-white ${
+                    proreq ? "active bg-gradient-success" : ""
+                  }`}
                 >
                   <div className="text-white text-center me-2 d-flex align-items-center justify-content-center">
                     <i className="material-icons opacity-10">table_view</i>
@@ -180,24 +132,13 @@ function Sidebar(props) {
                 </a>
               </Link>
             </li>
-            <li className="nav-item nav-tile">
-              <Link to="/farmer/investordeals">
-                <a
-                  className={`nav-link text-white ${investor ? "active bg-gradient-success" : ""
-                    }`}
-                >
-                  <div className="text-white text-center me-2 d-flex align-items-center justify-content-center">
-                    <i className="material-icons opacity-10">table_view</i>
-                  </div>
-                  <span className="nav-link-text ms-1">Investor Deals</span>
-                </a>
-              </Link>
-            </li>
+
             <li className="nav-item nav-tile">
               <Link to="/farmer/accepted">
                 <a
-                  className={`nav-link text-white ${accepted ? "active bg-gradient-success" : ""
-                    }`}
+                  className={`nav-link text-white ${
+                    accepted ? "active bg-gradient-success" : ""
+                  }`}
                 >
                   <div className="text-white text-center me-2 d-flex align-items-center justify-content-center">
                     <i className="material-icons opacity-10">table_view</i>

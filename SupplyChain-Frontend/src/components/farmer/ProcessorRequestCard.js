@@ -23,25 +23,23 @@ function ProcessorRequestCard(props) {
   };
 
   const insureHandler = async (e) => {
-    if (typeof window.ethereum !== "undefined" && acc != "") {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(paymentAddress, Payment.abi, signer);
-      const id = crop_id;
-      const data = await contract.updateStatus(id);
-      console.log(data);
+    // const provider = new ethers.providers.Web3Provider(window.ethereum);
+    // const signer = provider.getSigner();
+    // const contract = new ethers.Contract(paymentAddress, Payment.abi, signer);
+    // const id = crop_id;
+    // const data = await contract.updateStatus(id);
+    // console.log(data);
 
-      await axios
-        .put(`http://localhost:3001/insure/${id}/${crop_id}`, {
-          name: crop,
-          quantity: rquantity,
-        })
-        .then((resp) => {
-          console.log(resp.data);
-          alert(resp.data);
-        });
-      dispatch(dbActions.reload());
-    }
+    await axios
+      .put(`http://localhost:3001/insure/${id}/${crop_id}`, {
+        name: crop,
+        quantity: rquantity,
+      })
+      .then((resp) => {
+        console.log(resp.data);
+        alert(resp.data);
+      });
+    dispatch(dbActions.reload());
   };
   return (
     <div className="col-5 mb-xl-5 mb-4">
@@ -76,7 +74,7 @@ function ProcessorRequestCard(props) {
               <span className="text-success text-sm font-weight-bolder">
                 Quoted Price :
               </span>
-              &nbsp;&nbsp;₹{qprice}&nbsp;&nbsp;&nbsp;&nbsp;
+              &nbsp;&nbsp;GH₵{qprice}&nbsp;&nbsp;&nbsp;&nbsp;
             </p>
           </div>
           <div className="row">

@@ -18,10 +18,16 @@ const db = mysql.createConnection({
   database: "supplychain",
 });
 
+// Temporary storage functions (use Redis or database in production)
+const temporaryTransactions = new Map();
+
 const saltRounds = 12;
 // Encryption key for storing private keys (add this to your .env file)
 const ENCRYPTION_KEY_STRING =
   process.env.WALLET_ENCRYPTION_KEY || "your-32-character-secret-key-here!!";
+
+const PAYSTACK_BASE_URL = "https://api.paystack.co";
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
 const ENCRYPTION_KEY = crypto
   .createHash("sha256")
@@ -214,7 +220,7 @@ app.post("/registration", async (req, res) => {
     const insertQuery = `
       INSERT INTO users 
       (name, phone_number, physical_address, role, email, password, public_key, encrypted_private_key, encrypted_mnemonic, role_status) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'approved')
     `;
 
     const insertResult = await new Promise((resolve, reject) => {
@@ -551,49 +557,237 @@ app.post("/farmerbrodcast", (req, res) => {
   );
 });
 
-app.post("/paid", (req, res) => {
-  const crop_name = req.body.crop_name;
-  const qprice = req.body.qprice;
-  const lotId = req.body.lotId;
-  const buyer = req.body.buyer;
-  const seller = req.body.seller;
-  const quantity = req.body.quantity;
-  db.query(
-    "INSERT INTO orders (crop_name,price,crop_id,buyer,seller,quantity,status) VALUES(?,?,?,?,?,?,?)",
-    [crop_name, qprice, lotId, buyer, seller, quantity, "no"],
-    (err, result) => {
-      if (result) {
-        db.query(
-          "UPDATE  farmer_brodcast SET status = ? WHERE id = ?",
-          ["retailer", lotId],
-          (err, result) => {
-            if (result) {
-              db.query(
-                "UPDATE  offers SET status = ? WHERE crop_id = ?",
-                ["paid", lotId],
-                (err, result) => {
-                  if (result) {
-                    db.query(
-                      "UPDATE  insurance SET status = ? WHERE crop_id = ?",
-                      ["sold", lotId],
-                      (err, result) => {
-                        if (result) {
-                          res.send("Payment done");
+// Function to process successful payment (your commented database operations)
+async function processSuccessfulPayment(
+  crop_name,
+  qprice,
+  lotId,
+  buyer,
+  seller,
+  quantity
+) {
+  return new Promise((resolve, reject) => {
+    db.query(
+      "INSERT INTO orders (crop_name,price,crop_id,buyer,seller,quantity,status) VALUES(?,?,?,?,?,?,?)",
+      [crop_name, qprice, lotId, buyer, seller, quantity, "paid"], // Changed status to "paid"
+      (err, result) => {
+        if (result) {
+          db.query(
+            "UPDATE farmer_brodcast SET status = ? WHERE id = ?",
+            ["retailer", lotId],
+            (err, result) => {
+              if (result) {
+                db.query(
+                  "UPDATE offers SET status = ? WHERE crop_id = ?",
+                  ["paid", lotId],
+                  (err, result) => {
+                    if (result) {
+                      db.query(
+                        "UPDATE insurance SET status = ? WHERE crop_id = ?",
+                        ["sold", lotId],
+                        (err, result) => {
+                          if (result) {
+                            console.log(
+                              "All database updates completed successfully"
+                            );
+                            resolve("Payment processed successfully");
+                          } else {
+                            reject(new Error("Failed to update insurance"));
+                          }
                         }
-                      }
-                    );
+                      );
+                    } else {
+                      reject(new Error("Failed to update offers"));
+                    }
                   }
-                }
-              );
-            } else {
-              res.send("Unable to update");
+                );
+              } else {
+                reject(new Error("Failed to update farmer_brodcast"));
+              }
             }
+          );
+        } else {
+          reject(new Error("Failed to insert order"));
+        }
+      }
+    );
+  });
+}
+
+// Helper function to generate unique reference
+function generateReference() {
+  const timestamp = Date.now();
+  const random = Math.floor(Math.random() * 1000);
+  return `ref_${timestamp}_${random}`;
+}
+
+// Fixed /paid endpoint
+app.post("/paid", async (req, res) => {
+  const { crop_name, qprice, lotId, buyer, seller, quantity, email } = req.body;
+
+  // Fixed URL - removed extra quote
+  const url = `${PAYSTACK_BASE_URL}/transaction/initialize`;
+
+  console.log(crop_name, qprice, lotId, buyer, seller, quantity);
+
+  const totalAmount = parseFloat(qprice) * 100;
+  const reference = generateReference();
+
+  // CREATE THE transactionData OBJECT HERE - This was missing!
+  const transactionData = {
+    email: email, // Assuming buyer is an email address
+    amount: totalAmount,
+    reference: reference,
+    callback_url: "http://localhost:3000/payment-success", // Your frontend success page
+    metadata: {
+      custom_fields: [
+        {
+          display_name: "Crop Name",
+          variable_name: "crop_name",
+          value: crop_name,
+        },
+        {
+          display_name: "Lot ID",
+          variable_name: "lot_id",
+          value: lotId.toString(),
+        },
+        {
+          display_name: "Seller",
+          variable_name: "seller",
+          value: seller,
+        },
+        {
+          display_name: "Quantity",
+          variable_name: "quantity",
+          value: quantity.toString(),
+        },
+        {
+          display_name: "Unit Price",
+          variable_name: "unit_price",
+          value: qprice.toString(),
+        },
+      ],
+    },
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(transactionData), // Now transactionData is defined!
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.status) {
+      console.log("Transaction initialized successfully:", data);
+
+      // Store transaction details - IMPORTANT: Use the reference from Paystack response
+      const paystackReference = data.data.reference;
+      temporaryTransactions.set(paystackReference, {
+        crop_name,
+        qprice,
+        lotId,
+        buyer,
+        seller,
+        quantity,
+      });
+
+      // Send successful response back to client
+      res.status(200).json({
+        success: true,
+        message: "Payment initialized successfully",
+        data: {
+          authorization_url: data.data.authorization_url,
+          access_code: data.data.access_code,
+          reference: data.data.reference,
+        },
+      });
+    } else {
+      console.error("Error initializing transaction:", data);
+      res.status(400).json({
+        success: false,
+        message: data.message || "Failed to initialize transaction",
+        error: data,
+      });
+    }
+  } catch (error) {
+    console.error("Network error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+});
+
+app.post(
+  "/paystack-webhook",
+  express.json({ type: "application/json" }),
+  async (req, res) => {
+    const event = req.body;
+    console.log("Webhook received:", event);
+
+    // Handle successful charge
+    if (event.event === "charge.success") {
+      const { reference, status, metadata } = event.data;
+
+      if (status === "success") {
+        try {
+          // Get the stored transaction details
+          const transactionDetails = await getTemporaryTransaction(reference);
+
+          if (transactionDetails) {
+            const { crop_name, qprice, lotId, buyer, seller, quantity } =
+              transactionDetails;
+
+            // Execute your database operations here
+            await processSuccessfulPayment(
+              crop_name,
+              qprice,
+              lotId,
+              buyer,
+              seller,
+              quantity
+            );
+
+            console.log(
+              `Payment processed successfully for reference: ${reference}`
+            );
+
+            // Clean up temporary storage
+            await removeTemporaryTransaction(reference);
+          } else {
+            console.error(
+              "Transaction details not found for reference:",
+              reference
+            );
           }
-        );
+        } catch (error) {
+          console.error("Error processing webhook:", error);
+        }
       }
     }
-  );
-});
+
+    res.status(200).send("OK");
+  }
+);
+
+async function storeTemporaryTransaction(reference, data) {
+  temporaryTransactions.set(reference, data);
+  // In production, store this in database or Redis with TTL
+}
+
+async function getTemporaryTransaction(reference) {
+  return temporaryTransactions.get(reference);
+}
+
+async function removeTemporaryTransaction(reference) {
+  temporaryTransactions.delete(reference);
+}
 
 app.post("/qualityReport", (req, res) => {
   const crop = req.body.crop;
@@ -758,15 +952,41 @@ app.get("/previousPurchases/:id", (req, res) => {
 });
 
 app.get("/pendingPayments/:id", (req, res) => {
-  const id = req.params["id"];
+  const id = req.params.id;
+
   db.query(
-    "SELECT offers.crop_id,offers.price, offers.seller,offers.bid_price,offers.crop_name,offers.quantity FROM offers JOIN insurance ON offers.crop_id = insurance.crop_id WHERE offers.buyer = ? && insurance.status = ?",
+    `SELECT 
+        offers.crop_id,
+        offers.price, 
+        offers.seller,
+        offers.bid_price,
+        offers.crop_name,
+        offers.quantity,
+        user_wallet_info.email
+    FROM offers 
+    JOIN insurance ON offers.crop_id = insurance.crop_id 
+    JOIN user_wallet_info ON offers.buyer = user_wallet_info.wallet_address
+    WHERE offers.buyer = ? AND insurance.status = ?`,
     [id, "done"],
     (err, result) => {
-      if (result) {
+      if (err) {
+        console.error("Database error:", err);
+        return res.status(500).json({
+          success: false,
+          message: "Database query failed",
+          error: err.message,
+        });
+      }
+
+      if (result && result.length > 0) {
         res.send(result);
       } else {
-        res.send(false);
+        res.status(200).json({
+          success: true,
+          data: [],
+          count: 0,
+          message: "No pending payments found",
+        });
       }
     }
   );
