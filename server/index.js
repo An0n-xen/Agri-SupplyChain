@@ -871,13 +871,22 @@ app.get("/loanRequest", (req, res) => {
 
 app.get("/orders/:id", (req, res) => {
   const id = req.params["id"];
-  db.query("SELECT * FROM orders WHERE seller = ?", [id], (err, result) => {
-    if (result) {
-      res.send(result);
-    } else {
-      res.send(false);
+  db.query(
+    `SELECT *
+    FROM orders
+    JOIN user_wallet_info 
+        ON orders.buyer = user_wallet_info.wallet_address
+    WHERE seller = ?;
+`,
+    [id],
+    (err, result) => {
+      if (result) {
+        res.send(result);
+      } else {
+        res.send(false);
+      }
     }
-  });
+  );
 });
 
 app.get("/payback/:id", (req, res) => {
@@ -1078,7 +1087,12 @@ app.put("/insure/:id/:crop_id", (req, res) => {
 app.get("/processorBids/:id", (req, res) => {
   const id = req.params["id"];
   db.query(
-    "SELECT * FROM offers WHERE seller = ? && status = ?",
+    `SELECT *
+    FROM offers
+    JOIN user_wallet_info
+        ON offers.buyer = user_wallet_info.wallet_address
+    WHERE seller = ? AND status = ?;
+    `,
     [id, "open"],
 
     (err, result) => {
@@ -1178,7 +1192,8 @@ app.get("/report/:lotId", (req, res) => {
 });
 app.get("/farmerbrodcastcallprocessor", (req, res) => {
   db.query(
-    "SELECT * FROM farmer_brodcast WHERE  status = ? ORDER BY id DESC",
+    // "SELECT * FROM farmer_brodcast WHERE  status = ? ORDER BY id DESC"
+    `select * from farmer_brodcast join user_wallet_info on farmer_brodcast.public_key = user_wallet_info.wallet_address;`,
     ["open"],
 
     (err, result) => {

@@ -1,7 +1,7 @@
 import React from "react";
 
 function AcceptedDealCard(props) {
-  const { crop, lotId, price, buyer } = props;
+  const { crop, lotId, price, buyer, buyer_name } = props;
 
   return (
     <div className="col-5 mb-xl-5 mb-4">
@@ -38,7 +38,7 @@ function AcceptedDealCard(props) {
               <span className="text-success text-sm font-weight-bolder">
                 Buyer :
               </span>
-              &nbsp;&nbsp;{buyer}&nbsp;&nbsp;&nbsp;&nbsp;
+              &nbsp;&nbsp;{buyer_name}&nbsp;&nbsp;&nbsp;&nbsp;
             </p>
           </div>
           <div className="card-footer p-2">

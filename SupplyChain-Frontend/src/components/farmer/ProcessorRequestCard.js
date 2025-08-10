@@ -8,7 +8,8 @@ import { ethers } from "ethers";
 import { Logger } from "ethers/lib/utils";
 
 function ProcessorRequestCard(props) {
-  const { crop, processor, rquantity, qprice, id, crop_id } = props;
+  const { crop, processor, rquantity, qprice, id, crop_id, processor_name } =
+    props;
 
   const dispatch = useDispatch();
   const paymentAddress = useSelector((state) => state.db.address);
@@ -58,7 +59,7 @@ function ProcessorRequestCard(props) {
               <span className="text-success text-sm font-weight-bolder">
                 Name :
               </span>
-              &nbsp;&nbsp;{processor}&nbsp;&nbsp;&nbsp;&nbsp;
+              &nbsp;&nbsp;{processor_name}&nbsp;&nbsp;&nbsp;&nbsp;
             </p>
           </div>
           <div className="card-footer p-2">

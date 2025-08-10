@@ -21,10 +21,12 @@ function FarmerProductBroadcast() {
   }, [reload]);
 
   const list = result.map((d) => {
+    console.log(d);
     return (
       <FarmerBroadcastCard
         crop={d.crop}
         name={d.public_key}
+        actual_name={d.name}
         price={d.price}
         quantity={d.quantity}
         id={d.id}

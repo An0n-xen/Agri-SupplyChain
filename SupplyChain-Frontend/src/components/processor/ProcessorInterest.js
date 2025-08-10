@@ -56,6 +56,9 @@ function ProcessorInterest() {
         <td className="align-middle text-center text-sm">
           <h6 className="mb-0 text-sm">{element.quantity}</h6>
         </td>
+        <td className="align-middle text-center text-sm">
+          <h6 className="mb-0 text-sm">{element.status}</h6>
+        </td>
       </tr>
     );
   });
@@ -94,6 +97,9 @@ function ProcessorInterest() {
                             </th>
                             <th className="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
                               Quantity Requested
+                            </th>
+                            <th className="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                              Status
                             </th>
                           </tr>
                         </thead>

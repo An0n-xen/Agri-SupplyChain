@@ -18,12 +18,14 @@ function AcceptedDeals() {
     });
   }, [reload]);
   const list = result.map((d) => {
+    console.log(d);
     return (
       <AcceptedDealCard
         crop={d.crop_name}
         lotId={d.crop_id}
         price={d.price}
         buyer={d.buyer}
+        buyer_name={d.name}
       />
     );
   });

@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import "../../css/farmerbroadcast.css";
 
 function FarmerBroadcastCard(props) {
-  const { crop, name, price, quantity, id } = props;
+  const { crop, name, price, quantity, id, actual_name } = props;
   const [priceC, setPriceC] = useState(price);
   const [idC, setIdC] = useState(0);
   const user = useSelector((state) => state.db.userAcc);
@@ -44,7 +44,7 @@ function FarmerBroadcastCard(props) {
 
             <div className="text-end pt-1">
               <p className="text-md mb-0 text-capitalize">{crop}</p>
-              <h4 className="mb-0 mt-3">{name}</h4>
+              <h4 className="mb-0 mt-3">{actual_name}</h4>
             </div>
           </div>
           <hr className="dark horizontal my-0"></hr>
