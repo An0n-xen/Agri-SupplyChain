@@ -18,10 +18,13 @@ function RProcessorBroadcast() {
   useEffect(() => {
     axios.get(`http://localhost:3001/retailerBrodcast`).then((response) => {
       results = response.data;
-      setResult(results);
+      // Make sure this is an array
+      console.log(results);
+      setResult(Array.isArray(response.data) ? response.data : []);
     });
   }, [reload]);
   const list = result.map((d) => {
+    console.log(d);
     return (
       <RProcessorCard
         product={d.product_name}
@@ -29,6 +32,7 @@ function RProcessorBroadcast() {
         available={d.quantity}
         id={d.crop_id}
         seller={d.processor}
+        email={d.email}
       ></RProcessorCard>
     );
   });

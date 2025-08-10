@@ -99,7 +99,6 @@ function PaymentCard(props) {
 
   const payment = async (e) => {
     e.preventDefault(); // Prevent default form submission if needed
-    console.log("email", buyer_email);
     try {
       const response = await axios.post(`http://localhost:3001/paid`, {
         crop_name: crop_name,

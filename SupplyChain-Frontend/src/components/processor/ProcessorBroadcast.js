@@ -24,6 +24,7 @@ function ProcessorBroadcast() {
   const paymentAddress = useSelector((state) => state.db.address);
   let results;
   useEffect(() => {
+    console.log("my_id", id);
     axios
       .get(`http://localhost:3001/processorPurchases/${id}`)
       .then((response) => {
@@ -60,19 +61,6 @@ function ProcessorBroadcast() {
     if (!crop) {
       alert("Select a crop");
     } else {
-      if (typeof window.ethereum !== "undefined" && id != "") {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-
-        const contract = new ethers.Contract(
-          paymentAddress,
-          Payment.abi,
-          signer
-        );
-
-        const data = contract.updateStatus(crop);
-      }
-
       axios
         .post(`http://localhost:3001/brodcastToRetailer/${crop}`, {
           product: name,

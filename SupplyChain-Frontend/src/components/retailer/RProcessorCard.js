@@ -6,7 +6,7 @@ import { Logger } from "ethers/lib/utils";
 import { useDispatch, useSelector } from "react-redux";
 import { dbActions } from "../../store/dbSlice";
 function RProcessorCard(props) {
-  const { product, price, available, id, seller } = props;
+  const { product, price, available, id, seller, email } = props;
 
   const [result, setResult] = useState("");
   const [d, setD] = useState(false);
@@ -16,6 +16,7 @@ function RProcessorCard(props) {
   const userId = useSelector((state) => state.db.userAcc);
   const [priceE, setPriceE] = useState(0);
   let results;
+
   useEffect(() => {
     axios
       .get("https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=INR,")
@@ -26,38 +27,21 @@ function RProcessorCard(props) {
   const payment = async (e) => {
     // pay karo
     e.preventDefault();
-    const fin = price / priceE;
-    // const fin2 = ethers.utils.parseEther(`${fin}`.toString());
-    console.log(fin);
-    const fin2 = Number(fin).toFixed(18);
-    if (typeof window.ethereum !== "undefined" && id != "") {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-
-      const tx = {
-        from: userId,
-        to: seller,
-        value: ethers.utils.parseEther(`${fin2}`),
-      };
-      await signer.sendTransaction(tx).then((transaction) => {
-        console.dir(transaction);
-        alert("Payment Done!");
+    await axios
+      .post(`http://localhost:3001/paidProcessor/${id}`, {
+        product,
+        quantity: available,
+        seller,
+        buyer: userId,
+        price,
+        email,
+      })
+      .then((resp) => {
+        console.log(resp.data);
+        // Redirect to Paystack payment page
+        window.location.href = resp.data.data.authorization_url;
       });
-
-      await axios
-        .post(`http://localhost:3001/paidProcessor/${id}`, {
-          product,
-
-          quantity: available,
-          seller,
-          buyer: userId,
-          price,
-        })
-        .then((resp) => {
-          console.log(resp.data);
-        });
-      dispatch(dbActions.reload());
-    }
+    dispatch(dbActions.reload());
   };
   return (
     <div className="col-3 mb-xl-5 mb-4">

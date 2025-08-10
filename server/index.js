@@ -569,7 +569,7 @@ async function processSuccessfulPayment(
   return new Promise((resolve, reject) => {
     db.query(
       "INSERT INTO orders (crop_name,price,crop_id,buyer,seller,quantity,status) VALUES(?,?,?,?,?,?,?)",
-      [crop_name, qprice, lotId, buyer, seller, quantity, "paid"], // Changed status to "paid"
+      [crop_name, qprice, lotId, buyer, seller, quantity, "no"], // Changed status to "paid"
       (err, result) => {
         if (result) {
           db.query(
@@ -608,6 +608,40 @@ async function processSuccessfulPayment(
           );
         } else {
           reject(new Error("Failed to insert order"));
+        }
+      }
+    );
+  });
+}
+
+async function processRetailPayment(
+  product,
+  price,
+  id,
+  seller,
+  buyer,
+  quantity
+) {
+  return new Promise((resolve, reject) => {
+    db.query(
+      "UPDATE processor SET status = ? WHERE crop_id = ?",
+      ["close", id],
+      (err, result) => {
+        if (result) {
+          db.query(
+            "INSERT INTO retailer (crop_id, product_name, quantity, seller, buyer, status, price) VALUES(?,?,?,?,?,?,?)",
+            [id, product, quantity, seller, buyer, "open", price],
+            (err, result) => {
+              if (result) {
+                console.log("Retailer purchase processed successfully");
+                resolve("Successfully bought by retailer");
+              } else {
+                reject(new Error("Failed to insert into retailer table"));
+              }
+            }
+          );
+        } else {
+          reject(new Error("Failed to update processor table"));
         }
       }
     );
@@ -666,9 +700,16 @@ app.post("/paid", async (req, res) => {
           variable_name: "unit_price",
           value: qprice.toString(),
         },
+        {
+          display_name: "Processor Pay",
+          variable_name: "processor_pay",
+          value: "processor_pay",
+        },
       ],
     },
   };
+
+  const payer = "processor_pay";
 
   try {
     const response = await fetch(url, {
@@ -694,6 +735,7 @@ app.post("/paid", async (req, res) => {
         buyer,
         seller,
         quantity,
+        payer,
       });
 
       // Send successful response back to client
@@ -738,33 +780,68 @@ app.post(
       if (status === "success") {
         try {
           // Get the stored transaction details
-          const transactionDetails = await getTemporaryTransaction(reference);
 
-          if (transactionDetails) {
-            const { crop_name, qprice, lotId, buyer, seller, quantity } =
-              transactionDetails;
+          console.log("Meta data", metadata.custom_fields.at(-1).value);
+          if (metadata.custom_fields.at(-1).value === "retail_pay") {
+            const transactionDetails = await getTemporaryTransaction(reference);
 
-            // Execute your database operations here
-            await processSuccessfulPayment(
-              crop_name,
-              qprice,
-              lotId,
-              buyer,
-              seller,
-              quantity
-            );
+            console.log("retail payer");
 
-            console.log(
-              `Payment processed successfully for reference: ${reference}`
-            );
+            if (transactionDetails) {
+              const { product, price, id, seller, buyer, quantity } =
+                transactionDetails;
 
-            // Clean up temporary storage
-            await removeTemporaryTransaction(reference);
-          } else {
-            console.error(
-              "Transaction details not found for reference:",
-              reference
-            );
+              // Execute your database operations here
+              await processRetailPayment(
+                product,
+                price,
+                id,
+                seller,
+                buyer,
+                quantity
+              );
+
+              console.log(
+                `Payment processed successfully for reference: ${reference}`
+              );
+
+              // Clean up temporary storage
+              await removeTemporaryTransaction(reference);
+            } else {
+              console.error(
+                "Transaction details not found for reference:",
+                reference
+              );
+            }
+          } else if (metadata.custom_fields.at(-1).value == "processor_pay") {
+            const transactionDetails = await getTemporaryTransaction(reference);
+
+            if (transactionDetails) {
+              const { crop_name, qprice, lotId, buyer, seller, quantity } =
+                transactionDetails;
+
+              // Execute your database operations here
+              await processSuccessfulPayment(
+                crop_name,
+                qprice,
+                lotId,
+                buyer,
+                seller,
+                quantity
+              );
+
+              console.log(
+                `Payment processed successfully for reference: ${reference}`
+              );
+
+              // Clean up temporary storage
+              await removeTemporaryTransaction(reference);
+            } else {
+              console.error(
+                "Transaction details not found for reference:",
+                reference
+              );
+            }
           }
         } catch (error) {
           console.error("Error processing webhook:", error);
@@ -847,10 +924,11 @@ app.get("/requestPendingPayments", (req, res) => {
 
 app.get("/retailerBrodcast", (req, res) => {
   db.query(
-    "SELECT * FROM processor WHERE status = ? ORDER BY id DESC",
+    "SELECT * FROM processor JOIN user_wallet_info ON processor.processor = user_wallet_info.wallet_address WHERE processor.status = ? ORDER BY processor.id DESC",
     ["open"],
     (err, result) => {
       if (result) {
+        console.log(result);
         res.send(result);
       } else {
         res.send(false);
@@ -1001,6 +1079,8 @@ app.get("/pendingPayments/:id", (req, res) => {
   );
 });
 
+// Todo
+// Change from no to paid
 app.get("/processorPurchases/:id", (req, res) => {
   const id = req.params["id"];
   db.query(
@@ -1482,34 +1562,174 @@ app.post("/brodcastToCustomer/:id", (req, res) => {
   );
 });
 
-app.post("/paidProcessor/:id", (req, res) => {
+// app.post("/paidProcessor/:id", (req, res) => {
+//   const id = req.params["id"];
+//   const userAccount = req.body.buyer;
+//   const seller = req.body.seller;
+//   const product = req.body.product;
+//   const quantity = req.body.quantity;
+//   const price = req.body.price;
+//   db.query(
+//     "UPDATE  processor SET status = ? WHERE crop_id = ?",
+//     ["close", id],
+//     (err, result) => {
+//       if (result) {
+//         //insert
+
+//         db.query(
+//           "INSERT INTO retailer (crop_id,product_name,quantity,seller,buyer,status,price) VALUES(?,?,?,?,?,?,?)",
+//           [id, product, quantity, seller, userAccount, "open", price],
+//           (err, result) => {
+//             if (result) {
+//               res.send("Successfully Bought by retailer");
+//             }
+//           }
+//         );
+//       } else {
+//         res.send("Unable to update");
+//       }
+//     }
+//   );
+// });
+
+app.post("/paidProcessor/:id", async (req, res) => {
   const id = req.params["id"];
-  const userAccount = req.body.buyer;
+  const buyer = req.body.buyer;
   const seller = req.body.seller;
   const product = req.body.product;
   const quantity = req.body.quantity;
   const price = req.body.price;
-  db.query(
-    "UPDATE  processor SET status = ? WHERE crop_id = ?",
-    ["close", id],
-    (err, result) => {
-      if (result) {
-        //insert
+  const email = req.body.email;
 
-        db.query(
-          "INSERT INTO retailer (crop_id,product_name,quantity,seller,buyer,status,price) VALUES(?,?,?,?,?,?,?)",
-          [id, product, quantity, seller, userAccount, "open", price],
-          (err, result) => {
-            if (result) {
-              res.send("Successfully Bought by retailer");
-            }
-          }
-        );
-      } else {
-        res.send("Unable to update");
-      }
+  // Fixed URL - removed extra quote
+  const url = `${PAYSTACK_BASE_URL}/transaction/initialize`;
+
+  const totalAmount = parseFloat(price) * 100;
+  const reference = generateReference();
+
+  const transactionData = {
+    email: email, // Assuming buyer is an email address
+    amount: totalAmount,
+    reference: reference,
+    callback_url: "http://localhost:3000/payment-success", // Your frontend success page
+    metadata: {
+      custom_fields: [
+        {
+          display_name: "Product",
+          variable_name: "product",
+          value: product,
+        },
+        {
+          display_name: "ID",
+          variable_name: "id",
+          value: id.toString(),
+        },
+        {
+          display_name: "Seller",
+          variable_name: "seller",
+          value: seller,
+        },
+        {
+          display_name: "Buyer",
+          variable_name: "buyer",
+          value: buyer,
+        },
+        {
+          display_name: "Quantity",
+          variable_name: "quantity",
+          value: quantity.toString(),
+        },
+        {
+          display_name: "Unit Price",
+          variable_name: "unit_price",
+          value: price.toString(),
+        },
+        {
+          display_name: "Retail Pay",
+          variable_name: "retail_pay",
+          value: "retail_pay",
+        },
+      ],
+    },
+  };
+
+  const payer = "retailer_pay";
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(transactionData), // Now transactionData is defined!
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.status) {
+      console.log("Transaction initialized successfully:", data);
+
+      // Store transaction details - IMPORTANT: Use the reference from Paystack response
+      const paystackReference = data.data.reference;
+      temporaryTransactions.set(paystackReference, {
+        product,
+        price,
+        id,
+        seller,
+        buyer,
+        quantity,
+        payer,
+      });
+
+      // Send successful response back to client
+      res.status(200).json({
+        success: true,
+        message: "Payment initialized successfully",
+        data: {
+          authorization_url: data.data.authorization_url,
+          access_code: data.data.access_code,
+          reference: data.data.reference,
+        },
+      });
+    } else {
+      console.error("Error initializing transaction:", data);
+      res.status(400).json({
+        success: false,
+        message: data.message || "Failed to initialize transaction",
+        error: data,
+      });
     }
-  );
+  } catch (error) {
+    console.error("Network error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+
+  // db.query(
+  //   "UPDATE  processor SET status = ? WHERE crop_id = ?",
+  //   ["close", id],
+  //   (err, result) => {
+  //     if (result) {
+  //       //insert
+
+  //       db.query(
+  //         "INSERT INTO retailer (crop_id,product_name,quantity,seller,buyer,status,price) VALUES(?,?,?,?,?,?,?)",
+  //         [id, product, quantity, seller, userAccount, "open", price],
+  //         (err, result) => {
+  //           if (result) {
+  //             res.send("Successfully Bought by retailer");
+  //           }
+  //         }
+  //       );
+  //     } else {
+  //       res.send("Unable to update");
+  //     }
+  //   }
+  // );
 });
 
 app.put("/paidUpdate/:lotId", (req, res) => {
