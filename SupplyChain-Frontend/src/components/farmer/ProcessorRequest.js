@@ -15,6 +15,7 @@ function ProcessorRequest() {
     axios.get(`http://localhost:3001/processorBids/${id}`).then((response) => {
       results = response.data;
       setResult(results);
+      console.log(id);
       console.log(response.data);
     });
   }, [reload]);

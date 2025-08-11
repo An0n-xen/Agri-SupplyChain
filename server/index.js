@@ -524,6 +524,8 @@ app.post("/offer/:idd", (req, res) => {
     "SELECT * FROM offers WHERE buyer = ? && crop_id = ?",
     [userAccount, id],
     (err, result) => {
+      console.log("crop id", id);
+      console.log("bid results", result);
       if (result.length == 0) {
         db.query(
           "INSERT INTO offers (buyer,seller,price,crop_id,crop_name,quantity,bid_price,status) VALUES(?,?,?,?,?,?,?,?)",
@@ -551,7 +553,7 @@ app.post("/farmerbrodcast", (req, res) => {
     [userAccount, crop, quantity, price, "open"],
     (err, result) => {
       if (result) {
-        res.send("Successfully Brodcasted");
+        res.send("Successfully Broadcasted");
       }
     }
   );
@@ -1170,7 +1172,7 @@ app.get("/processorBids/:id", (req, res) => {
     `SELECT *
     FROM offers
     JOIN user_wallet_info
-        ON offers.buyer = user_wallet_info.wallet_address
+        ON offers.seller = user_wallet_info.wallet_address
     WHERE seller = ? AND status = ?;
     `,
     [id, "open"],
@@ -1273,7 +1275,7 @@ app.get("/report/:lotId", (req, res) => {
 app.get("/farmerbrodcastcallprocessor", (req, res) => {
   db.query(
     // "SELECT * FROM farmer_brodcast WHERE  status = ? ORDER BY id DESC"
-    `select * from farmer_brodcast join user_wallet_info on farmer_brodcast.public_key = user_wallet_info.wallet_address;`,
+    `select * FROM farmer_brodcast JOIN user_wallet_info ON farmer_brodcast.public_key = user_wallet_info.wallet_address WHERE  farmer_brodcast.status = ? ORDER BY farmer_brodcast.id DESC`,
     ["open"],
 
     (err, result) => {
