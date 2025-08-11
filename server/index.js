@@ -1045,19 +1045,28 @@ app.get("/pendingPayments/:id", (req, res) => {
 
   db.query(
     `SELECT 
-        offers.crop_id,
-        offers.price, 
-        offers.seller,
-        offers.bid_price,
-        offers.crop_name,
-        offers.quantity,
-        user_wallet_info.email
-    FROM offers 
-    JOIN insurance ON offers.crop_id = insurance.crop_id 
-    JOIN user_wallet_info ON offers.buyer = user_wallet_info.wallet_address
-    WHERE offers.buyer = ? AND insurance.status = ?`,
+          offers.crop_id,
+          offers.price, 
+          offers.seller,
+          offers.bid_price,
+          offers.crop_name,
+          offers.quantity,
+          buyer.email AS buyer_email,
+          buyer.name  AS buyer_name,
+          seller.name AS seller_name
+    FROM offers
+    JOIN insurance 
+        ON offers.crop_id = insurance.crop_id
+    JOIN user_wallet_info AS buyer 
+        ON offers.buyer = buyer.wallet_address
+    JOIN user_wallet_info AS seller
+        ON offers.seller = seller.wallet_address
+    WHERE offers.buyer = ? 
+  AND insurance.status = ?;
+`,
     [id, "done"],
     (err, result) => {
+      console.log(result);
       if (err) {
         console.error("Database error:", err);
         return res.status(500).json({
@@ -1275,10 +1284,11 @@ app.get("/report/:lotId", (req, res) => {
 app.get("/farmerbrodcastcallprocessor", (req, res) => {
   db.query(
     // "SELECT * FROM farmer_brodcast WHERE  status = ? ORDER BY id DESC"
-    `select * FROM farmer_brodcast JOIN user_wallet_info ON farmer_brodcast.public_key = user_wallet_info.wallet_address WHERE  farmer_brodcast.status = ? ORDER BY farmer_brodcast.id DESC`,
+    `SELECT farmer_brodcast.*, user_wallet_info.name FROM farmer_brodcast JOIN user_wallet_info ON farmer_brodcast.public_key = user_wallet_info.wallet_address WHERE  farmer_brodcast.status = ? ORDER BY farmer_brodcast.id DESC`,
     ["open"],
 
     (err, result) => {
+      console.log(result);
       if (result) {
         res.send(result);
       } else {

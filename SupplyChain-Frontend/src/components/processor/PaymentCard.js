@@ -15,6 +15,7 @@ function PaymentCard(props) {
     lotId,
     crop_name,
     buyer_email,
+    seller_name,
   } = props;
   const [result, setResult] = useState("");
   const [d, setD] = useState(false);
@@ -99,6 +100,7 @@ function PaymentCard(props) {
 
   const payment = async (e) => {
     e.preventDefault(); // Prevent default form submission if needed
+    console.log(buyer_email);
     try {
       const response = await axios.post(`http://localhost:3001/paid`, {
         crop_name: crop_name,
@@ -206,7 +208,7 @@ function PaymentCard(props) {
         <div className="card-header p-3 pt-2">
           <div className="text-end pt-1">
             <p className="display-7 mb-0 text-capitalize font-weight-bolder">
-              {name}
+              {seller_name}
             </p>
           </div>
         </div>

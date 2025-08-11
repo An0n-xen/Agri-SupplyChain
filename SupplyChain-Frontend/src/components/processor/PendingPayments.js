@@ -52,6 +52,7 @@ function PendingPayments() {
   }, [id, reload]);
 
   const list = result.map((d, index) => {
+    console.log("data", d);
     return (
       <PaymentCard
         key={d.crop_id + index} // Add a unique key
@@ -61,7 +62,8 @@ function PendingPayments() {
         lotId={d.crop_id}
         qprice={d.bid_price}
         crop_name={d.crop_name}
-        buyer_email={d.email}
+        buyer_email={d.buyer_email}
+        seller_name={d.seller_name}
       />
     );
   });

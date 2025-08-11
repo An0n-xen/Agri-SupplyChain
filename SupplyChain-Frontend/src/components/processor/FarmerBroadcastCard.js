@@ -17,7 +17,6 @@ function FarmerBroadcastCard(props) {
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    console.log(idC);
     axios
       .post(`http://localhost:3001/offer/${idC}`, {
         crop,
