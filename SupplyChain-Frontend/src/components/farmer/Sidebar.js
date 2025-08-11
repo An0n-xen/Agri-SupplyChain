@@ -33,8 +33,12 @@ function Sidebar(props) {
       >
         <div className="baju sidenav-header">
           <a className="navbar-brand m-0" target="_blank">
-            <img src={logo} className="navbar-brand-img" alt="main_logo" />
-            <span className="ms-1 font-weight-bold text-white">AgriChain</span>
+            <Link to="/">
+              <img src={logo} className="navbar-brand-img" alt="main_logo" />
+              <span className="ms-1 font-weight-bold text-white">
+                AgriChain
+              </span>
+            </Link>
           </a>
         </div>
         <hr className="horizontal light mt-0 mb-2" />

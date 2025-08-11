@@ -30,6 +30,7 @@ function FarmerProductBroadcast() {
         price={d.price}
         quantity={d.quantity}
         id={d.id}
+        unit={d.unit}
       ></FarmerBroadcastCard>
     );
   });

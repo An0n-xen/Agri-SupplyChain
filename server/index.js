@@ -543,20 +543,54 @@ app.post("/offer/:idd", (req, res) => {
   );
 });
 
-app.post("/farmerbrodcast", (req, res) => {
-  const userAccount = req.body.id;
-  const crop = req.body.crop;
-  const quantity = req.body.quantity;
-  const price = req.body.price;
-  db.query(
-    "INSERT INTO farmer_brodcast (public_key,crop,quantity,price,status) VALUES(?,?,?,?,?)",
-    [userAccount, crop, quantity, price, "open"],
-    (err, result) => {
-      if (result) {
-        res.send("Successfully Broadcasted");
-      }
+// app.post("/farmerbrodcast", (req, res) => {
+//   const userAccount = req.body.id;
+//   const crop = req.body.crop;
+//   const quantity = req.body.quantity;
+//   const price = req.body.price;
+//   db.query(
+//     "INSERT INTO farmer_brodcast (public_key,crop,quantity,price,status) VALUES(?,?,?,?,?)",
+//     [userAccount, crop, quantity, price, "open"],
+//     (err, result) => {
+//       if (result) {
+//         res.send("Successfully Broadcasted");
+//       }
+//     }
+//   );
+// });
+
+app.post("/farmerbrodcast", async (req, res) => {
+  try {
+    const { crop, quantity, unit, price, id } = req.body;
+
+    // Validate the unit is one of the allowed values
+    const allowedUnits = [
+      "kg",
+      "tonnes",
+      "bags",
+      "pieces",
+      "boxes",
+      "crates",
+      "bundles",
+      "sacks",
+    ];
+    if (!allowedUnits.includes(unit)) {
+      return res.status(400).json({ message: "Invalid unit specified" });
     }
-  );
+
+    // Insert into database
+    const query = `
+      INSERT INTO farmer_brodcast (crop, quantity, unit, price, public_key, created_at) 
+      VALUES (?, ?, ?, ?, ?, NOW())
+    `;
+
+    await db.execute(query, [crop, quantity, unit, price, id]);
+
+    res.json("Broadcast added successfully!");
+  } catch (error) {
+    console.error("Error adding broadcast:", error);
+    res.status(500).json({ message: "Failed to add broadcast" });
+  }
 });
 
 // Function to process successful payment (your commented database operations)
@@ -1209,21 +1243,42 @@ app.get("/qualityC", (req, res) => {
     }
   );
 });
-app.get("/farmerbrodcastcall/:id", (req, res) => {
-  const id = req.params["id"];
-  db.query(
-    "SELECT * FROM farmer_brodcast WHERE public_key = ? && status = ?",
-    [id, "open"],
 
-    (err, result) => {
-      if (result) {
-        res.send(result);
-      } else {
-        res.send(false);
-      }
-    }
-  );
+// app.get("/farmerbrodcastcall/:id", (req, res) => {
+//   const id = req.params["id"];
+//   db.query(
+//     "SELECT * FROM farmer_brodcast WHERE public_key = ? && status = ?",
+//     [id, "open"],
+
+//     (err, result) => {
+//       if (result) {
+//         res.send(result);
+//       } else {
+//         res.send(false);
+//       }
+//     }
+//   );
+// });
+
+app.get("/farmerbrodcastcall/:id", async (req, res) => {
+  try {
+    const farmerId = req.params.id;
+
+    const query = `
+      SELECT id, crop, quantity, unit, price, created_at 
+      FROM farmer_broadcasts 
+      WHERE farmer_id = ? 
+      ORDER BY created_at DESC
+    `;
+
+    const [results] = await db.execute(query, [farmerId]);
+    res.json(results);
+  } catch (error) {
+    console.error("Error fetching broadcasts:", error);
+    res.status(500).json({ message: "Failed to fetch broadcasts" });
+  }
 });
+
 app.get("/reportScore/:id", (req, res) => {
   const id = req.params["id"];
   db.query(
