@@ -909,14 +909,15 @@ app.post("/qualityReport", (req, res) => {
   const defect = req.body.defect;
   const remarks = req.body.remarks;
   const id = req.body.id;
+  const qAccount = req.body.qualityCheckerAccount;
   db.query(
-    "UPDATE  insurance SET status = ? WHERE crop_id = ?",
-    ["done", id],
+    "UPDATE insurance SET status = ?, qualityChecker = ? WHERE crop_id = ?",
+    ["done", qAccount, id],
     (err, result) => {
       if (result) {
         db.query(
-          "INSERT INTO report (crop_id,sample_size,defective,remark) VALUES(?,?,?,?)",
-          [id, samples, defect, remarks],
+          "INSERT INTO report (crop_id, sample_size, defective, remark, qualityChecker, created_at) VALUES (?, ?, ?, ?, ?, NOW())",
+          [id, samples, defect, remarks, qAccount],
           (err, result) => {
             if (result) {
               res.send("Successfully Added report");
@@ -1047,7 +1048,7 @@ app.get("/requestCreditScore/:id", (req, res) => {
 app.get("/history/:id", (req, res) => {
   const id = req.params["id"];
   db.query(
-    "SELECT * FROM orders WHERE seller = ? ORDER BY id DESC",
+    "SELECT * FROM orders JOIN user_wallet_info on orders.buyer = user_wallet_info.wallet_address WHERE orders.seller = ? ORDER BY orders.id DESC",
     [id],
     (err, result) => {
       if (result) {
@@ -1177,6 +1178,7 @@ app.put("/insure/:id/:crop_id", (req, res) => {
   const crop_id = req.params["crop_id"];
   const name = req.body.name;
   const quantity = req.body.quantity;
+  const farmer_account = req.body.address;
 
   db.query(
     "SELECT * FROM insurance WHERE crop_id = ?",
@@ -1185,16 +1187,17 @@ app.put("/insure/:id/:crop_id", (req, res) => {
       if (result.length == 0) {
         db.query(
           "UPDATE offers  SET status = ?  WHERE crop_id = ?",
-          ["approve", id],
-
+          ["approve", crop_id],
           (err, result) => {
             if (result) {
               db.query(
-                "INSERT INTO insurance (crop_id,status,name,quantity) VALUES(?,?,?,?)",
-                [crop_id, "insured", name, quantity],
+                "INSERT INTO insurance (crop_id,status,name,quantity,Insurer) VALUES(?,?,?,?,?)",
+                [crop_id, "insured", name, quantity, farmer_account],
                 (err, result) => {
                   if (result) {
-                    res.send("Successfull 1");
+                    res.send("Crop Insured");
+                  } else {
+                    console.log(err);
                   }
                 }
               );
@@ -1244,40 +1247,55 @@ app.get("/qualityC", (req, res) => {
   );
 });
 
-// app.get("/farmerbrodcastcall/:id", (req, res) => {
-//   const id = req.params["id"];
-//   db.query(
-//     "SELECT * FROM farmer_brodcast WHERE public_key = ? && status = ?",
-//     [id, "open"],
+app.get("/qualityD", (req, res) => {
+  db.query(
+    "SELECT * FROM insurance JOIN report ON insurance.crop_id = report.crop_id WHERE insurance.status = ? ORDER BY insurance.id DESC",
+    ["done"],
 
-//     (err, result) => {
-//       if (result) {
-//         res.send(result);
-//       } else {
-//         res.send(false);
-//       }
-//     }
-//   );
-// });
-
-app.get("/farmerbrodcastcall/:id", async (req, res) => {
-  try {
-    const farmerId = req.params.id;
-
-    const query = `
-      SELECT id, crop, quantity, unit, price, created_at 
-      FROM farmer_broadcasts 
-      WHERE farmer_id = ? 
-      ORDER BY created_at DESC
-    `;
-
-    const [results] = await db.execute(query, [farmerId]);
-    res.json(results);
-  } catch (error) {
-    console.error("Error fetching broadcasts:", error);
-    res.status(500).json({ message: "Failed to fetch broadcasts" });
-  }
+    (err, result) => {
+      if (result) {
+        res.send(result);
+      } else {
+        res.send(false);
+      }
+    }
+  );
 });
+
+app.get("/farmerbrodcastcall/:id", (req, res) => {
+  const id = req.params["id"];
+  db.query(
+    "SELECT * FROM farmer_brodcast WHERE public_key = ? && status = ?",
+    [id, "open"],
+
+    (err, result) => {
+      if (result) {
+        res.send(result);
+      } else {
+        res.send(false);
+      }
+    }
+  );
+});
+
+// app.get("/farmerbrodcastcall/:id", async (req, res) => {
+//   try {
+//     const farmerId = req.params.id;
+
+//     const query = `
+//       SELECT id, crop, quantity, unit, price, created_at
+//       FROM farmer_brodcast
+//       WHERE public_key = ?
+//       ORDER BY created_at DESC
+//     `;
+
+//     const [results] = await db.execute(query, [farmerId]);
+//     res.json(results);
+//   } catch (error) {
+//     console.error("Error fetching broadcasts:", error);
+//     res.status(500).json({ message: "Failed to fetch broadcasts" });
+//   }
+// });
 
 app.get("/reportScore/:id", (req, res) => {
   const id = req.params["id"];
@@ -1347,7 +1365,7 @@ app.get("/farmerbrodcastcallprocessor", (req, res) => {
       if (result) {
         res.send(result);
       } else {
-        res.send(false);
+        res.send(false)``;
       }
     }
   );

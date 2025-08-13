@@ -136,7 +136,7 @@ function FarmerBroadcast() {
         </td>
         <td>
           <p className="text-xs font-weight-bold mb-0">GH₵ {element.price}</p>
-          <small className="text-muted">per {element.unit || "unit"}</small>
+          {/* <small className="text-muted">per {element.unit || "unit"}</small> */}
         </td>
         <td className="align-middle text-center text-sm">
           <h6 className="mb-0 text-sm">
@@ -144,13 +144,13 @@ function FarmerBroadcast() {
           </h6>
         </td>
         <td className="align-middle text-center text-sm">
-          <h6 className="mb-0 text-sm text-success">
+          {/* <h6 className="mb-0 text-sm text-success">
             GH₵{" "}
             {(parseFloat(element.quantity) * parseFloat(element.price)).toFixed(
               2
             )}
-          </h6>
-          <small className="text-muted">Total Value</small>
+          </h6> */}
+          {/* <small className="text-muted">Total Value</small> */}
         </td>
       </tr>
     );
@@ -185,14 +185,14 @@ function FarmerBroadcast() {
                               Crop Name
                             </th>
                             <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
-                              Price per Unit
+                              Price
                             </th>
                             <th className="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
                               Quantity
                             </th>
-                            <th className="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                              Total Value
-                            </th>
+                            {/* <th className="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                              Total
+                            </th> */}
                           </tr>
                         </thead>
                         <tbody>{list}</tbody>

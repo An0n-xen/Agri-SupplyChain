@@ -16,6 +16,8 @@ import FarmerProductBroadcast from "./components/processor/FarmerProductBroadcas
 import ProcessorInterest from "./components/processor/ProcessorInterest";
 import PendingPayments from "./components/processor/PendingPayments";
 import QualityReports from "./components/quality checker/QualityReports";
+import QualityDashboard from "./components/quality checker/QualityCheckerDashboard";
+import QualityPastChecks from "./components/quality checker/QualityCheckerPast";
 import RetailerDashboard from "./components/retailer/RetailerDashboard";
 import RProcessorBroadcast from "./components/retailer/RProcessorBroadcast";
 import PreviousOrder from "./components/retailer/PreviousOrder";
@@ -143,6 +145,14 @@ function App() {
           {/* Quality Checker Routing */}
 
           <Route path="/qualityChecker" element={<QualityReports />}></Route>
+          <Route
+            path="/qualityChecker/dashboard"
+            element={<QualityDashboard />}
+          ></Route>
+          <Route
+            path="/qualityChecker/pastChecks"
+            element={<QualityPastChecks />}
+          ></Route>
 
           {/* Retailer Routing */}
 

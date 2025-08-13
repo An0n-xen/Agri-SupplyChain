@@ -24,23 +24,44 @@ function ProcessorRequestCard(props) {
   };
 
   const insureHandler = async (e) => {
-    // const provider = new ethers.providers.Web3Provider(window.ethereum);
-    // const signer = provider.getSigner();
-    // const contract = new ethers.Contract(paymentAddress, Payment.abi, signer);
-    // const id = crop_id;
-    // const data = await contract.updateStatus(id);
-    // console.log(data);
+    // await axios
+    //   .put(`http://localhost:3001/insure/${id}/${crop_id}`, {
+    //     name: crop,
+    //     quantity: rquantity,
+    //     address: acc,
+    //   })
+    //   .then((resp) => {
+    //     console.log(resp.data);
+    //     alert(resp.data);
+    //   });
+    // dispatch(dbActions.reload());
+    try {
+      const resp = await axios.put(
+        `http://localhost:3001/insure/${id}/${crop_id}`,
+        {
+          name: crop,
+          quantity: rquantity,
+          address: acc,
+        }
+      );
 
-    await axios
-      .put(`http://localhost:3001/insure/${id}/${crop_id}`, {
-        name: crop,
-        quantity: rquantity,
-      })
-      .then((resp) => {
-        console.log(resp.data);
-        alert(resp.data);
-      });
-    dispatch(dbActions.reload());
+      console.log("Response:", resp.data);
+      alert(resp.data);
+
+      dispatch(dbActions.reload());
+    } catch (error) {
+      if (error.response) {
+        console.error("Error response:", error.response.data);
+        console.error("Status code:", error.response.status);
+        alert(`Server Error: ${error.response.data}`);
+      } else if (error.request) {
+        console.error("No response received:", error.request);
+        alert("No response from server. Please check your connection.");
+      } else {
+        console.error("Request setup error:", error.message);
+        alert(`Error: ${error.message}`);
+      }
+    }
   };
   return (
     <div className="col-5 mb-xl-5 mb-4">

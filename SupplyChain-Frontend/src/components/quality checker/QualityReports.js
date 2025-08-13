@@ -37,10 +37,18 @@ function QualityReports() {
 
   return (
     <div className="home-body">
+      <div className="left-body">
+        <QualitySidebar qreport="1"></QualitySidebar>
+      </div>
       <div className="right-body">
-        <h3>Quality Reports!</h3>
-        <div className="container-fluid py-4">
-          <div className="row">{list}</div>
+        <SubNav heading="Quality Reports"></SubNav>
+        <div className="broadcast-body">
+          <h3>Quality Reports!</h3>
+          <div className="container-fluid py-4">
+            <div className="row">
+              {list.length === 0 ? <p>No quality reports yet...</p> : list}
+            </div>
+          </div>
         </div>
       </div>
     </div>

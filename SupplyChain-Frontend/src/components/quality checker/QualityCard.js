@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 import { dbActions } from "../../store/dbSlice";
 function QualityCard(props) {
@@ -9,6 +10,7 @@ function QualityCard(props) {
   const [defect, setDefect] = useState();
   const [remarks, setRemarks] = useState("");
   const dispatch = useDispatch();
+  const acc = useSelector((state) => state.db.userAcc);
 
   const sample = async (e) => {
     setSamples(e.target.value);
@@ -30,6 +32,7 @@ function QualityCard(props) {
         samples: samples,
         defect: defect,
         remarks: remarks,
+        qualityCheckerAccount: acc,
       })
       .then((resp) => {
         alert(resp.data);

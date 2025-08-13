@@ -1,24 +1,25 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import SubNav from "../../utils/SubNav";
-import RetailerSidebar from "./RetailerSidebar";
-import retailer from "../../images/retailer.png";
+import QualitySidebar from "./QualitySidebar";
+import quality from "../../images/quality.png";
+import { useSelector } from "react-redux";
+import axios from "axios";
 
-function RetailerDashboard() {
+function QualityDashboard() {
   const id = useSelector((state) => state.db.userAcc);
   const [result, setResult] = useState([]);
 
   useEffect(() => {
     axios.get(`http://localhost:3001/getUser/${id}`).then((response) => {
+      console.log(response.data[0]);
       setResult(response.data[0]);
     });
-  });
+  }, []);
 
   return (
     <div className="home-body">
       <div className="left-body">
-        <RetailerSidebar dash="1"></RetailerSidebar>
+        <QualitySidebar dash="1"></QualitySidebar>
       </div>
       <div className="right-body">
         <SubNav heading="Dashboard"></SubNav>
@@ -28,12 +29,18 @@ function RetailerDashboard() {
               <div className="col-lg-7">
                 <div className="about-text go-to">
                   <h3 className="dark-color">Hello, {result.name}!</h3>
-                  <h6 className="theme-color lead"> Occupation: Retailer</h6>
+                  <h6 className="theme-color lead">
+                    {" "}
+                    Occupation: Quality Checker
+                  </h6>
                   <p>
-                    I <mark>connect</mark> manufacturers and consumers with each
-                    other. I purchase products from manufacturers and other
-                    wholesale distributors, and then sell those products to
-                    consumers through stores or online channels.
+                    I <mark>inspect</mark> and verify the quality of
+                    agricultural products throughout the supply chain. My role
+                    is crucial in ensuring that products meet the required
+                    standards before they move from farmers to processors. I
+                    conduct thorough examinations, document defects, and provide
+                    quality certificates that help maintain trust in the supply
+                    chain.
                   </p>
                   <div className="row about-list">
                     <div className="col-md-5">
@@ -65,38 +72,10 @@ function RetailerDashboard() {
               </div>
               <div className="col-lg-5">
                 <div className="about-avatar">
-                  <img className="imga" src={retailer} title="" alt="" />
+                  <img className="imga" src={quality} title="" alt="" />
                 </div>
               </div>
             </div>
-            {/* <div className="counter">
-              <div className="row">
-                <div className="col-6 col-lg-3">
-                  <div className="count-data text-center">
-                    <h6 className="count h2" data-to="500" data-speed="500">500</h6>
-                    <p className="m-0px font-w-600">Retailer BroadCasts</p>
-                  </div>
-                </div>
-                <div className="col-6 col-lg-3">
-                  <div className="count-data text-center">
-                    <h6 className="count h2" data-to="150" data-speed="150">150</h6>
-                    <p className="m-0px font-w-600">Processor Requests</p>
-                  </div>
-                </div>
-                <div className="col-6 col-lg-3">
-                  <div className="count-data text-center">
-                    <h6 className="count h2" data-to="850" data-speed="850">850</h6>
-                    <p className="m-0px font-w-600">Previous Orders</p>
-                  </div>
-                </div>
-                <div className="col-6 col-lg-3">
-                  <div className="count-data text-center">
-                    <h6 className="count h2" data-to="190" data-speed="190">190</h6>
-                    <p className="m-0px font-w-600">No. of Reports</p>
-                  </div>
-                </div>
-              </div>
-            </div> */}
           </div>
         </section>
       </div>
@@ -104,4 +83,4 @@ function RetailerDashboard() {
   );
 }
 
-export default RetailerDashboard;
+export default QualityDashboard;
