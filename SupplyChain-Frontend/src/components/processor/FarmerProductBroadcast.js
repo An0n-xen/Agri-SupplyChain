@@ -7,12 +7,14 @@ import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 function FarmerProductBroadcast() {
   const [result, setResult] = useState([]);
-
+  const user = useSelector((state) => state.db.userAcc);
   const reload = useSelector((state) => state.db.reload);
   let results;
   useEffect(() => {
     axios
-      .get(`http://localhost:3001/farmerbrodcastcallprocessor`)
+      .get(`http://localhost:3001/farmerbrodcastcallprocessor`, {
+        params: { user },
+      })
       .then((response) => {
         results = response.data;
         setResult(results);

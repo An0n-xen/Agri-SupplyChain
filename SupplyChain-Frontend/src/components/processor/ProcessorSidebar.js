@@ -14,8 +14,10 @@ function ProcessorSidebar(props) {
     fbroad,
     pInterest,
     ppayment,
+    transactions, // Added missing transactions prop
     status,
   } = props;
+
   return (
     <div className="sidebar-body">
       <div
@@ -53,9 +55,6 @@ function ProcessorSidebar(props) {
               </Link>
             </li>
             <li className="nav-item mt-3">
-              {/* <h6 className="baju ps-4 ms-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">
-                Retail-Trade
-              </h6> */}
               <div className="ps-4 ms-2 pb-2 text-uppercase text-xs text-white font-weight-bolder opacity-8">
                 Retailer Trade
               </div>
@@ -146,6 +145,20 @@ function ProcessorSidebar(props) {
                     <i className="material-icons opacity-10">table_view</i>
                   </div>
                   <span className="nav-link-text ms-1">Pending Payments</span>
+                </a>
+              </Link>
+            </li>
+            <li className="nav-item nav-tile">
+              <Link to="/processor/transactions">
+                <a
+                  className={`nav-link text-white ${
+                    transactions ? "active bg-gradient-danger" : ""
+                  }`}
+                >
+                  <div className="text-white text-center me-2 d-flex align-items-center justify-content-center">
+                    <i className="material-icons opacity-10">table_view</i>
+                  </div>
+                  <span className="nav-link-text ms-1">Transactions</span>
                 </a>
               </Link>
             </li>

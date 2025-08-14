@@ -520,6 +520,7 @@ app.post("/offer/:idd", (req, res) => {
   const priceC = req.body.priceC;
   //  insert bid once
 
+  console.log(userAccount, seller);
   db.query(
     "SELECT * FROM offers WHERE buyer = ? && crop_id = ?",
     [userAccount, id],
@@ -532,12 +533,21 @@ app.post("/offer/:idd", (req, res) => {
           [userAccount, seller, price, id, crop, quantity, priceC, "open"],
           (err, result) => {
             if (result) {
-              res.send("Successfully Bidded");
+              db.query(
+                "INSERT INTO processor_accepts (crop_id, processor, farmer, crop, created_at) VALUES(?,?,?,?,NOW())",
+                [id, userAccount, seller, crop],
+                (err, result) => {
+                  if (result) {
+                    console.log("Successfully closed");
+                  }
+                }
+              );
+              res.send("Successfully Bided");
             }
           }
         );
       } else {
-        res.send("Already bidded");
+        res.send("Already Bided");
       }
     }
   );
@@ -1060,6 +1070,23 @@ app.get("/history/:id", (req, res) => {
   );
 });
 
+app.get("/processorHistory/:id", (req, res) => {
+  const id = req.params["id"];
+  db.query(
+    "SELECT * FROM orders JOIN user_wallet_info on orders.seller = user_wallet_info.wallet_address WHERE orders.buyer = ? ORDER BY orders.id DESC",
+    [id],
+    (err, result) => {
+      if (result) {
+        console.log(result);
+        console.log(id);
+        res.send(result);
+      } else {
+        res.send(false);
+      }
+    }
+  );
+});
+
 app.get("/previousPurchases/:id", (req, res) => {
   const id = req.params["id"];
   db.query(
@@ -1171,6 +1198,81 @@ app.get("/processorInterest/:id", (req, res) => {
       }
     }
   );
+});
+
+// app.delete("/processorInterest/:id", (req, res) => {
+//   const id = req.params["id"];
+
+//   // First delete from offers
+//   db.query("DELETE FROM offers WHERE id = ?", [id], (err, result1) => {
+//     if (err) {
+//       console.error(err);
+//       return res.status(500).send(false);
+//     }
+
+//     // Then delete from processor_accepts
+//     db.query(
+//       "DELETE FROM processor_accepts WHERE crop_id = ?",
+//       [result1.crop_id],
+//       (err, result2) => {
+//         if (err) {
+//           console.error(err);
+//           return res.status(500).send(false);
+//         }
+
+//         console.log(result1);
+//         res.send({
+//           offersDeleted: result1.affectedRows,
+//           acceptsDeleted: result2.affectedRows,
+//         });
+//       }
+//     );
+//   });
+// });
+
+app.delete("/processorInterest/:id", (req, res) => {
+  const id = req.params.id;
+
+  // Step 1: Select the offer first
+  db.query("SELECT * FROM offers WHERE id = ?", [id], (err, rows) => {
+    if (err) {
+      console.error("Error selecting offer:", err);
+      return res.status(500).send(false);
+    }
+
+    if (rows.length === 0) {
+      return res.status(404).send({ message: "Offer not found" });
+    }
+
+    const offer = rows[0];
+
+    // Step 2: Delete from offers
+    db.query("DELETE FROM offers WHERE id = ?", [id], (err, result1) => {
+      if (err) {
+        console.error("Error deleting offer:", err);
+        return res.status(500).send(false);
+      }
+
+      // Step 3: Delete from processor_accepts
+      db.query(
+        "DELETE FROM processor_accepts WHERE crop_id = ?",
+        [offer.crop_id],
+        (err, result2) => {
+          if (err) {
+            console.error("Error deleting processor_accepts:", err);
+            return res.status(500).send(false);
+          }
+
+          console.log("Deleted offer:", offer);
+          res.send({
+            deletedOffer: offer, // full data of deleted offer
+            offersDeleted: result1.affectedRows,
+            acceptsDeleted: result2.affectedRows,
+          });
+        }
+      );
+    });
+  });
 });
 
 app.put("/insure/:id/:crop_id", (req, res) => {
@@ -1354,22 +1456,55 @@ app.get("/report/:lotId", (req, res) => {
     }
   );
 });
-app.get("/farmerbrodcastcallprocessor", (req, res) => {
-  db.query(
-    // "SELECT * FROM farmer_brodcast WHERE  status = ? ORDER BY id DESC"
-    `SELECT farmer_brodcast.*, user_wallet_info.name FROM farmer_brodcast JOIN user_wallet_info ON farmer_brodcast.public_key = user_wallet_info.wallet_address WHERE  farmer_brodcast.status = ? ORDER BY farmer_brodcast.id DESC`,
-    ["open"],
+// app.get("/farmerbrodcastcallprocessor", (req, res) => {
+//   const user = req.query.user;
+//   db.query(
+//     // "SELECT * FROM farmer_brodcast WHERE  status = ? ORDER BY id DESC"
+//     `SELECT farmer_brodcast.*, user_wallet_info.name FROM farmer_brodcast JOIN user_wallet_info ON farmer_brodcast.public_key = user_wallet_info.wallet_address WHERE  farmer_brodcast.status = ? ORDER BY farmer_brodcast.id DESC`,
+//     ["open"],
 
-    (err, result) => {
-      console.log(result);
-      if (result) {
-        res.send(result);
-      } else {
-        res.send(false)``;
-      }
+//     (err, result) => {
+//       if (result) {
+//         db.query(
+//           "select * from processor_accepts where processor = ?",
+//           [user],
+//           (err, result) => (err ? console.log(err) : console.log(result))
+//         );
+//         res.send(result);
+//       } else {
+//         res.send(false)``;
+//       }
+//     }
+//   );
+// });
+
+app.get("/farmerbrodcastcallprocessor", (req, res) => {
+  const user = req.query.user;
+
+  const sql = `
+    SELECT fb.*, uw.name
+    FROM farmer_brodcast fb
+    JOIN user_wallet_info uw
+      ON fb.public_key = uw.wallet_address
+    WHERE fb.status = ?
+      AND NOT EXISTS (
+        SELECT 1
+        FROM processor_accepts pa
+        WHERE pa.crop_id = fb.id
+          AND pa.processor = ?
+      )
+    ORDER BY fb.id DESC
+  `;
+
+  db.query(sql, ["open", user], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send("Database error");
     }
-  );
+    res.send(result);
+  });
 });
+
 app.get("/reailerBrodcasts/:id", (req, res) => {
   db.query(
     "SELECT * FROM customer WHERE  status = ? ORDER BY id DESC",

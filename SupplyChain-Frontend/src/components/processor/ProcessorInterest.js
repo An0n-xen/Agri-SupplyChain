@@ -4,46 +4,68 @@ import SubNav from "../../utils/SubNav";
 import ProcessorSidebar from "./ProcessorSidebar";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+
 function ProcessorInterest() {
   const [result, setResult] = useState([]);
+  const [loading, setLoading] = useState(false);
   const id = useSelector((state) => state.db.userAcc);
   const reload = useSelector((state) => state.db.reload);
+  const dispatch = useDispatch();
+
   let results;
+
   useEffect(() => {
+    fetchProcessorInterests();
+  }, [reload]);
+
+  const fetchProcessorInterests = () => {
     axios
       .get(`http://localhost:3001/processorInterest/${id}`)
       .then((response) => {
         results = response.data;
         setResult(results);
         console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching processor interests:", error);
       });
-  }, [reload]);
-  //     const farmer = [{
-  //         item: 'item1',
-  //         price: 200,
-  //         quantity: 20
-  //     },
-  //     {
-  //         item: 'item2',
-  //         price: 400,
-  //         quantity: 10
-  //     },
-  //     {
-  //         item: 'item3',
-  //         price: 700,
-  //         quantity: 100
-  //     }
-  // ]
+  };
+
+  const handleRemoveInterest = async (interestId) => {
+    if (window.confirm("Are you sure you want to remove this interest?")) {
+      setLoading(true);
+      try {
+        await axios.delete(
+          `http://localhost:3001/processorInterest/${interestId}`
+        );
+
+        // Remove the item from local state immediately for better UX
+        setResult((prevResult) =>
+          prevResult.filter((item) => item.id !== interestId)
+        );
+
+        // Optional: Trigger reload in Redux if other components depend on it
+        dispatch({ type: "TRIGGER_RELOAD" });
+
+        console.log("Interest removed successfully");
+      } catch (error) {
+        console.error("Error removing interest:", error);
+        alert("Failed to remove interest. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
 
   const list = result.map((element) => {
     return (
-      <tr>
+      <tr key={element.id}>
         <td>
           <div className="d-flex px-2 py-1">
             <div>
               <i className="material-icons opacity-10">grass</i>
-            </div>{" "}
+            </div>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <div className="d-flex flex-column justify-content-center">
               <h5 className="mb-0 text-sm">{element.crop_name}</h5>
@@ -58,6 +80,20 @@ function ProcessorInterest() {
         </td>
         <td className="align-middle text-center text-sm">
           <h6 className="mb-0 text-sm">{element.status}</h6>
+        </td>
+        <td className="align-middle text-center">
+          {element.status?.toLowerCase() === "open" ? (
+            <button
+              className="btn btn-sm btn-outline-danger"
+              onClick={() => handleRemoveInterest(element.id)}
+              disabled={loading}
+              title="Remove Interest"
+            >
+              <i className="material-icons text-sm">delete</i>
+            </button>
+          ) : (
+            <span className="text-muted text-xs">-</span>
+          )}
         </td>
       </tr>
     );
@@ -92,7 +128,6 @@ function ProcessorInterest() {
                               Farmer Name
                             </th>
                             <th className="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
-                              {" "}
                               Price Quoted
                             </th>
                             <th className="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
@@ -100,6 +135,9 @@ function ProcessorInterest() {
                             </th>
                             <th className="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
                               Status
+                            </th>
+                            <th className="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                              Actions
                             </th>
                           </tr>
                         </thead>

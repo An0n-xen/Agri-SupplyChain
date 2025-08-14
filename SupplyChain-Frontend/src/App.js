@@ -14,6 +14,7 @@ import YourBroadcast from "./components/processor/YourBroadcast";
 import OrderDetails from "./components/processor/OrderDetails";
 import FarmerProductBroadcast from "./components/processor/FarmerProductBroadcast";
 import ProcessorInterest from "./components/processor/ProcessorInterest";
+import ProcessorTransactions from "./components/processor/Transactions";
 import PendingPayments from "./components/processor/PendingPayments";
 import QualityReports from "./components/quality checker/QualityReports";
 import QualityDashboard from "./components/quality checker/QualityCheckerDashboard";
@@ -136,6 +137,10 @@ function App() {
           <Route
             path="/processor/payments"
             element={<PendingPayments />}
+          ></Route>
+          <Route
+            path="/processor/transactions"
+            element={<ProcessorTransactions />}
           ></Route>
           <Route
             path="/processor/status"
