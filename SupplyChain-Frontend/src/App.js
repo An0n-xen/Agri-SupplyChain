@@ -26,6 +26,8 @@ import BroadcastToCustomer from "./components/retailer/BroadcastToCustomer";
 import CustomerDashboard from "./components/customer/CustomerDashboard";
 import CustomerRetailerBroadcast from "./components/customer/CustomerRetailerBroadcast";
 import PreviousPurchases from "./components/customer/PreviousPurchases";
+import RetailerBroadcast from "./components/retailer/RetailerBroadcast";
+import RPreviousTransactions from "./components/retailer/RPreviousTransactions";
 import Crop from "./components/farmer/Crop";
 import TrackStatus from "./utils/TrackStatus";
 import Admin from "./components/admin/Admin";
@@ -171,8 +173,16 @@ function App() {
             element={<PreviousOrder />}
           ></Route>
           <Route
+            path="/retailer/retailerbroadcasts"
+            element={<RetailerBroadcast />}
+          ></Route>
+          <Route
             path="/retailer/broadcastToCustomer"
             element={<BroadcastToCustomer />}
+          ></Route>
+          <Route
+            path="/retailer/rprevioustransactions"
+            element={<RPreviousTransactions />}
           ></Route>
           <Route path="/retailer/status" element={<RetailerTracking />}></Route>
 

@@ -2047,6 +2047,38 @@ app.get("/retailerOrderHistory/:id", (req, res) => {
   );
 });
 
+app.get("/rbroadcasts/:id", (req, res) => {
+  const id = req.params["id"];
+  db.query(
+    "SELECT * FROM customer JOIN user_wallet_info ON customer.retailer = user_wallet_info.wallet_address WHERE customer.retailer = ? ORDER BY customer.crop_id DESC",
+    [id],
+
+    (err, result) => {
+      if (result) {
+        res.send(result);
+      } else {
+        res.send(false);
+      }
+    }
+  );
+});
+
+app.get("/rpreviousTransactions/:id", (req, res) => {
+  const id = req.params["id"];
+  db.query(
+    "SELECT * FROM retailer JOIN user_wallet_info ON retailer.buyer = user_wallet_info.wallet_address WHERE retailer.buyer = ? ORDER BY retailer.crop_id DESC",
+    [id],
+
+    (err, result) => {
+      if (result) {
+        res.send(result);
+      } else {
+        res.send(false);
+      }
+    }
+  );
+});
+
 app.get("/getData/:crop", (req, res) => {
   const crop = req.params["crop"];
   db.query(
@@ -2055,8 +2087,8 @@ app.get("/getData/:crop", (req, res) => {
     (err, farmer) => {
       if (farmer) {
         db.query(
-          "SELECT * FROM users where role = ? LIMIT 1",
-          ["qualitychecker"],
+          "SELECT ins.qualityChecker, uw.*  FROM insurance AS ins JOIN user_wallet_info AS uw ON ins.qualityChecker = uw.wallet_address where ins.crop_id = ?",
+          [crop],
           (err, quality) => {
             if (quality) {
               db.query(
