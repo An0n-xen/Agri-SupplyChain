@@ -1,0 +1,196 @@
+/* File: SupplyChain-Frontend/src/css/blockchain-status.css */
+
+.blockchain-status-container {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.blockchain-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.blockchain-header h4 {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  color: #333;
+}
+
+.blockchain-header h4 i {
+  margin-right: 10px;
+  color: #17a2b8;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.status-badge i {
+  margin-right: 5px;
+  font-size: 18px;
+}
+
+.status-badge.verified {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-badge.not-verified {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.loading {
+  text-align: center;
+  padding: 30px;
+}
+
+.spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #17a2b8;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  margin: 15px 0;
+}
+
+.error-message i {
+  margin-right: 10px;
+}
+
+.blockchain-data {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 15px 0;
+}
+
+.blockchain-data h5 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+
+.timestamp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.timestamp-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #17a2b8;
+}
+
+.timestamp-item .label {
+  font-weight: 500;
+  color: #495057;
+}
+
+.timestamp-item .value {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.blockchain-actions {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.blockchain-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.not-on-chain {
+  text-align: center;
+  padding: 30px;
+  background: white;
+  border-radius: 8px;
+  margin: 15px 0;
+}
+
+.not-on-chain p {
+  color: #6c757d;
+  margin-bottom: 20px;
+}
+
+.not-on-chain .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.blockchain-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  background: #e3f2fd;
+  border-radius: 4px;
+  margin-top: 15px;
+}
+
+.blockchain-info i {
+  color: #1976d2;
+}
+
+.blockchain-info small {
+  color: #495057;
+  line-height: 1.5;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .blockchain-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .timestamp-item {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .timestamp-item .value {
+    font-size: 12px;
+  }
+}

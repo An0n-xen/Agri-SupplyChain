@@ -1,5 +1,5 @@
 require("@nomiclabs/hardhat-waffle");
-require("dotenv").config();
+require("dotenv").config({ path: "../.env" });
 require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-etherscan");
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -30,6 +30,14 @@ module.exports = {
   networks: {
     ganache: {
       url: "http://127.0.0.1:7545",
+    },
+    localhost: {
+      url: "http://127.0.0.1:8545",
+    },
+    sepolia: {
+      url: "https://sepolia.infura.io/v3/060dd4434e504cc68127ca4a9cdcbe2c",
+      chainId: 11155111,
+      accounts: [process.env.ADMIN_PRIVATE_KEY],
     },
   },
   solidity: {

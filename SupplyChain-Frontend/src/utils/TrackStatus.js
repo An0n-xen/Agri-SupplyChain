@@ -4,6 +4,7 @@ import Sidebar from "../components/farmer/Sidebar";
 import "../css/bootstrap.css";
 import LeftTimelineCard from "./LeftTimelineCard";
 import RightTimelineCard from "./RightTimelineCard";
+import BlockchainStatus from "../components/BlockchainStatus";
 import Payment from "../../src/artifacts/contracts/Payment.sol/Payment.json";
 import { ethers } from "ethers";
 import { useSelector } from "react-redux";
@@ -12,38 +13,23 @@ import axios from "axios";
 
 function TrackStatus() {
   const [id, setId] = useState("");
+  const [currentCropId, setCurrentCropId] = useState(null); // Track current crop ID
   const paymentAddress = useSelector((state) => state.db.address);
   const [results, setResults] = useState([]);
 
   const lotId = async (e) => {
     setId(e.target.value);
   };
+
   const submitHandler = async (e) => {
     e.preventDefault();
     console.log(id);
+    setCurrentCropId(id); // Set the current crop ID for blockchain component
 
-    // if (typeof window.ethereum !== "undefined") {
-    //   const provider = new ethers.providers.Web3Provider(window.ethereum);
-
-    //   const contract = new ethers.Contract(
-    //     paymentAddress,
-    //     Payment.abi,
-    //     provider
-    //   );
-    //   try {
-    //     const data = await contract.getStatus(id);
-    //     const no = parseInt(data._hex, 16);
-    //     console.log(no);
-    //     setId("");
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // }
     loadData();
   };
 
   async function loadData() {
-    let res = [];
     await axios
       .get(`http://localhost:3001/getData/${id}`)
       .then(async (response) => {
@@ -59,7 +45,6 @@ function TrackStatus() {
         res.push(jso);
       }
     }
-
     return res;
   }
 
@@ -70,22 +55,24 @@ function TrackStatus() {
       i++;
       return (
         <LeftTimelineCard
+          key={`left-${i}-${d.public_key}`}
           public_key={d.public_key}
           name={d.name}
           role={d.role}
-          contact={d.phone_number}
-          address={d.physical_address}
+          contact={d.phone_number || d.number}
+          address={d.physical_address || d.address}
         ></LeftTimelineCard>
       );
     }
     i++;
     return (
       <RightTimelineCard
+        key={`right-${i}-${d.public_key}`}
         public_key={d.public_key}
         name={d.name}
         role={d.role}
-        contact={d.phone_number}
-        address={d.physical_address}
+        contact={d.phone_number || d.number}
+        address={d.physical_address || d.address}
       ></RightTimelineCard>
     );
   });
@@ -93,7 +80,7 @@ function TrackStatus() {
   return (
     <div className="home-body">
       <div className="left-body">
-        <Sidebar status="1"></Sidebar>
+        <Sidebar status="1" />
       </div>
       <div className="right-body">
         <SubNav heading="Track Status"></SubNav>
@@ -117,12 +104,24 @@ function TrackStatus() {
                   name="broadcastCrop"
                   className="btn btn-m bg-gradient-info mb-0"
                 >
-                  Predict Crop
+                  Track Product
                 </button>
               </div>
             </div>
           </form>
-          {list}
+
+          {/* Add Blockchain Status Component */}
+          {currentCropId && results.length > 0 && (
+            <BlockchainStatus cropId={currentCropId} />
+          )}
+
+          {/* Supply Chain Timeline */}
+          {results.length > 0 && (
+            <div className="timeline-container">
+              <h4 className="timeline-header">Supply Chain Journey</h4>
+              {list}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -18,6 +18,1140 @@ const db = mysql.createConnection({
   database: "supplychain",
 });
 
+// Add this to your server/index.js file after the existing imports
+const SupplyChainTrackingABI = [
+  {
+    inputs: [],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "cropId",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "customer",
+        type: "address",
+      },
+    ],
+    name: "CustomerAdded",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "cropId",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "farmer",
+        type: "address",
+      },
+    ],
+    name: "FarmerAdded",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "cropId",
+        type: "uint256",
+      },
+    ],
+    name: "JourneyCompleted",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "cropId",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "processor",
+        type: "address",
+      },
+    ],
+    name: "ProcessorAdded",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "cropId",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "qualityChecker",
+        type: "address",
+      },
+    ],
+    name: "QualityCheckerAdded",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
+        name: "cropId",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "retailer",
+        type: "address",
+      },
+    ],
+    name: "RetailerAdded",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_cropId",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "_publicKey",
+        type: "address",
+      },
+      {
+        internalType: "string",
+        name: "_name",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_role",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_contactNumber",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_physicalAddress",
+        type: "string",
+      },
+    ],
+    name: "addCustomer",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_cropId",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "_publicKey",
+        type: "address",
+      },
+      {
+        internalType: "string",
+        name: "_name",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_role",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_contactNumber",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_physicalAddress",
+        type: "string",
+      },
+    ],
+    name: "addFarmer",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_cropId",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "_publicKey",
+        type: "address",
+      },
+      {
+        internalType: "string",
+        name: "_name",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_role",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_contactNumber",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_physicalAddress",
+        type: "string",
+      },
+    ],
+    name: "addProcessor",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_cropId",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "_publicKey",
+        type: "address",
+      },
+      {
+        internalType: "string",
+        name: "_name",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_role",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_contactNumber",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_physicalAddress",
+        type: "string",
+      },
+    ],
+    name: "addQualityChecker",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_cropId",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "_publicKey",
+        type: "address",
+      },
+      {
+        internalType: "string",
+        name: "_name",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_role",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_contactNumber",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_physicalAddress",
+        type: "string",
+      },
+    ],
+    name: "addRetailer",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_cropId",
+        type: "uint256",
+      },
+    ],
+    name: "getSupplyChainJourney",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "publicKey",
+            type: "address",
+          },
+          {
+            internalType: "string",
+            name: "name",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "role",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "contactNumber",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "physicalAddress",
+            type: "string",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct SupplyChainTracking.Participant",
+        name: "farmer",
+        type: "tuple",
+      },
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "publicKey",
+            type: "address",
+          },
+          {
+            internalType: "string",
+            name: "name",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "role",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "contactNumber",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "physicalAddress",
+            type: "string",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct SupplyChainTracking.Participant",
+        name: "qualityChecker",
+        type: "tuple",
+      },
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "publicKey",
+            type: "address",
+          },
+          {
+            internalType: "string",
+            name: "name",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "role",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "contactNumber",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "physicalAddress",
+            type: "string",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct SupplyChainTracking.Participant",
+        name: "processor",
+        type: "tuple",
+      },
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "publicKey",
+            type: "address",
+          },
+          {
+            internalType: "string",
+            name: "name",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "role",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "contactNumber",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "physicalAddress",
+            type: "string",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct SupplyChainTracking.Participant",
+        name: "retailer",
+        type: "tuple",
+      },
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "publicKey",
+            type: "address",
+          },
+          {
+            internalType: "string",
+            name: "name",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "role",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "contactNumber",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "physicalAddress",
+            type: "string",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct SupplyChainTracking.Participant[]",
+        name: "customers",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_cropId",
+        type: "uint256",
+      },
+    ],
+    name: "journeyExists",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+];
+
+// Add the contract address (update this after deploying the contract)
+const SUPPLY_CHAIN_TRACKING_ADDRESS =
+  process.env.SUPPLY_CHAIN_TRACKING_ADDRESS ||
+  "0x0000000000000000000000000000000000000000";
+
+// Function to store supply chain data on blockchain
+async function storeSupplyChainOnBlockchain(cropId, supplyChainData) {
+  try {
+    // Get the admin wallet (you should have a dedicated admin wallet for this)
+    const provider = new ethers.providers.JsonRpcProvider(
+      process.env.BLOCKCHAIN_RPC_URL || "http://localhost:8545"
+    );
+
+    // Use admin wallet (create a separate admin wallet for contract interactions)
+    const adminPrivateKey =
+      process.env.ADMIN_PRIVATE_KEY || "your-admin-private-key";
+    const adminWallet = new ethers.Wallet(adminPrivateKey, provider);
+
+    // Create contract instance
+    const contract = new ethers.Contract(
+      SUPPLY_CHAIN_TRACKING_ADDRESS,
+      SupplyChainTrackingABI,
+      adminWallet
+    );
+
+    // Check if journey already exists
+    const exists = await contract.journeyExists(cropId);
+
+    if (!exists) {
+      // Add farmer data
+      if (supplyChainData.farmer && supplyChainData.farmer.length > 0) {
+        const farmer = supplyChainData.farmer[0];
+        console.log("Adding farmer to blockchain...");
+        console.log(farmer);
+        const tx1 = await contract.addFarmer(
+          cropId,
+          farmer.public_key,
+          farmer.name || "",
+          farmer.role || "farmer",
+          farmer.phone_number || "",
+          farmer.physical_address || ""
+        );
+        await tx1.wait();
+        console.log("Farmer added successfully");
+      }
+    }
+
+    // Add quality checker data
+    if (supplyChainData.quality && supplyChainData.quality.length > 0) {
+      const qualityChecker = supplyChainData.quality[0];
+      console.log("Adding quality checker to blockchain...");
+      console.log("Quality Checker", qualityChecker);
+      const tx2 = await contract.addQualityChecker(
+        cropId,
+        qualityChecker.public_key || qualityChecker.wallet_address,
+        qualityChecker.name || "",
+        qualityChecker.role || "qualitychecker",
+        qualityChecker.phone_number || "",
+        qualityChecker.physical_address || ""
+      );
+      await tx2.wait();
+      console.log("Quality checker added successfully");
+    }
+
+    // Add processor data
+    if (supplyChainData.processor && supplyChainData.processor.length > 0) {
+      const processor = supplyChainData.processor[0];
+      console.log("Adding processor to blockchain...");
+      console.log("Processor", processor);
+      const tx3 = await contract.addProcessor(
+        cropId,
+        processor.public_key,
+        processor.name || "",
+        processor.role || "processor",
+        processor.phone_number || "",
+        processor.physical_address || ""
+      );
+      await tx3.wait();
+      console.log("Processor added successfully");
+    }
+
+    // Add retailer data
+    if (supplyChainData.retailer && supplyChainData.retailer.length > 0) {
+      const retailer = supplyChainData.retailer[0];
+      console.log("Adding retailer to blockchain...");
+      console.log("retailer", retailer);
+      const tx4 = await contract.addRetailer(
+        cropId,
+        retailer.public_key,
+        retailer.name || "",
+        retailer.role || "retailer",
+        retailer.phone_number || "",
+        retailer.physical_address || ""
+      );
+      await tx4.wait();
+      console.log("Retailer added successfully");
+    }
+
+    // Add customer data (can be multiple)
+    if (supplyChainData.customer && supplyChainData.customer.length > 0) {
+      for (const customer of supplyChainData.customer) {
+        console.log("Adding customer to blockchain...");
+        const tx5 = await contract.addCustomer(
+          cropId,
+          customer.public_key,
+          customer.name || "",
+          customer.role || "customer",
+          customer.phone_number || "",
+          customer.physical_address || ""
+        );
+        await tx5.wait();
+        console.log("Customer added successfully");
+      }
+    }
+
+    console.log(
+      `Supply chain data for crop ${cropId} stored on blockchain successfully`
+    );
+    return true;
+  } catch (error) {
+    console.error("Error storing supply chain data on blockchain:", error);
+    return false;
+  }
+}
+
+// Function to retrieve supply chain data from blockchain
+async function getSupplyChainFromBlockchain(cropId) {
+  try {
+    const provider = new ethers.providers.JsonRpcProvider(
+      process.env.BLOCKCHAIN_RPC_URL || "http://localhost:8545"
+    );
+
+    // Create contract instance (read-only, no wallet needed)
+    const contract = new ethers.Contract(
+      SUPPLY_CHAIN_TRACKING_ADDRESS,
+      SupplyChainTrackingABI,
+      provider
+    );
+
+    // Check if journey exists
+    const exists = await contract.journeyExists(cropId);
+    if (!exists) {
+      return null;
+    }
+
+    // Get supply chain journey
+    const journey = await contract.getSupplyChainJourney(cropId);
+
+    console.log("Journey", journey);
+
+    // Format the data
+    const formattedData = {
+      farmer:
+        journey.farmer.publicKey !== ethers.constants.AddressZero
+          ? {
+              public_key: journey.farmer.publicKey,
+              name: journey.farmer.name,
+              role: journey.farmer.role,
+              number: journey.farmer.contactNumber,
+              address: journey.farmer.physicalAddress,
+              timestamp: journey.farmer.timestamp.toString(),
+            }
+          : null,
+      qualityChecker:
+        journey.qualityChecker.publicKey !== ethers.constants.AddressZero
+          ? {
+              public_key: journey.qualityChecker.publicKey,
+              name: journey.qualityChecker.name,
+              role: journey.qualityChecker.role,
+              number: journey.qualityChecker.contactNumber,
+              address: journey.qualityChecker.physicalAddress,
+              timestamp: journey.qualityChecker.timestamp.toString(),
+            }
+          : null,
+      processor:
+        journey.processor.publicKey !== ethers.constants.AddressZero
+          ? {
+              public_key: journey.processor.publicKey,
+              name: journey.processor.name,
+              role: journey.processor.role,
+              number: journey.processor.contactNumber,
+              address: journey.processor.physicalAddress,
+              timestamp: journey.processor.timestamp.toString(),
+            }
+          : null,
+      retailer:
+        journey.retailer.publicKey !== ethers.constants.AddressZero
+          ? {
+              public_key: journey.retailer.publicKey,
+              name: journey.retailer.name,
+              role: journey.retailer.role,
+              number: journey.retailer.contactNumber,
+              address: journey.retailer.physicalAddress,
+              timestamp: journey.retailer.timestamp.toString(),
+            }
+          : null,
+      customers: journey.customers.map((customer) => ({
+        public_key: customer.publicKey,
+        name: customer.name,
+        role: customer.role,
+        number: customer.contactNumber,
+        address: customer.physicalAddress,
+        timestamp: customer.timestamp.toString(),
+      })),
+    };
+
+    console.log("formattedData", formattedData);
+
+    return formattedData;
+  } catch (error) {
+    console.error("Error retrieving supply chain data from blockchain:", error);
+    return null;
+  }
+}
+
+// Updated getData endpoint with blockchain integration
+app.get("/getData/:crop", async (req, res) => {
+  const crop = req.params["crop"];
+
+  try {
+    // First, try to get data from blockchain
+    const blockchainData = await getSupplyChainFromBlockchain(crop);
+
+    if (blockchainData) {
+      // If data exists on blockchain, format and return it
+      const response = [
+        blockchainData.farmer ? [blockchainData.farmer] : [],
+        blockchainData.qualityChecker ? [blockchainData.qualityChecker] : [],
+        blockchainData.processor ? [blockchainData.processor] : [],
+        blockchainData.retailer ? [blockchainData.retailer] : [],
+        blockchainData.customers || [],
+      ];
+
+      console.log("Returning supply chain data from blockchain");
+      res.send(response);
+      return;
+    }
+
+    // If not on blockchain, get from database and store on blockchain
+    db.query(
+      "SELECT * FROM users where public_key = (SELECT public_key FROM farmer_brodcast where id = ?)",
+      [crop],
+      (err, farmer) => {
+        if (farmer) {
+          db.query(
+            "SELECT ins.qualityChecker, uw.*  FROM insurance AS ins JOIN user_wallet_info AS uw ON ins.qualityChecker = uw.wallet_address where ins.crop_id = ?",
+            [crop],
+            (err, quality) => {
+              if (quality) {
+                db.query(
+                  "SELECT * FROM users where public_key = (SELECT buyer FROM orders where crop_id = ?)",
+                  [crop],
+                  (err, processor) => {
+                    if (processor) {
+                      db.query(
+                        "SELECT * FROM users where public_key = (SELECT buyer FROM retailer where crop_id = ?)",
+                        [crop],
+                        (err, retailer) => {
+                          if (retailer) {
+                            db.query(
+                              "SELECT * FROM users where public_key IN (SELECT DISTINCT(buyer) FROM sales where crop_id = ?)",
+                              [crop],
+                              async (err, customer) => {
+                                if (customer) {
+                                  const response = [
+                                    farmer,
+                                    quality,
+                                    processor,
+                                    retailer,
+                                    customer,
+                                  ];
+
+                                  // Store on blockchain asynchronously
+                                  const supplyChainData = {
+                                    farmer: farmer,
+                                    quality: quality,
+                                    processor: processor,
+                                    retailer: retailer,
+                                    customer: customer,
+                                  };
+
+                                  // Don't wait for blockchain storage to complete
+                                  storeSupplyChainOnBlockchain(
+                                    crop,
+                                    supplyChainData
+                                  )
+                                    .then((result) => {
+                                      if (result) {
+                                        console.log(
+                                          `Supply chain data for crop ${crop} stored on blockchain`
+                                        );
+                                      }
+                                    })
+                                    .catch((err) => {
+                                      console.error(
+                                        `Failed to store crop ${crop} on blockchain:`,
+                                        err
+                                      );
+                                    });
+
+                                  res.send(response);
+                                }
+                              }
+                            );
+                          }
+                        }
+                      );
+                    }
+                  }
+                );
+              }
+            }
+          );
+        }
+      }
+    );
+  } catch (error) {
+    console.error("Error in getData:", error);
+    // Fall back to database query if blockchain fails
+    db.query(
+      "SELECT * FROM users where public_key = (SELECT public_key FROM farmer_brodcast where id = ?)",
+      [crop],
+      (err, farmer) => {
+        if (farmer) {
+          db.query(
+            "SELECT ins.qualityChecker, uw.*  FROM insurance AS ins JOIN user_wallet_info AS uw ON ins.qualityChecker = uw.wallet_address where ins.crop_id = ?",
+            [crop],
+            (err, quality) => {
+              if (quality) {
+                db.query(
+                  "SELECT * FROM users where public_key = (SELECT buyer FROM orders where crop_id = ?)",
+                  [crop],
+                  (err, processor) => {
+                    if (processor) {
+                      db.query(
+                        "SELECT * FROM users where public_key = (SELECT buyer FROM retailer where crop_id = ?)",
+                        [crop],
+                        (err, retailer) => {
+                          if (retailer) {
+                            db.query(
+                              "SELECT * FROM users where public_key IN (SELECT DISTINCT(buyer) FROM sales where crop_id = ?)",
+                              [crop],
+                              (err, customer) => {
+                                if (customer) {
+                                  const response = [
+                                    farmer,
+                                    quality,
+                                    processor,
+                                    retailer,
+                                    customer,
+                                  ];
+                                  res.send(response);
+                                }
+                              }
+                            );
+                          }
+                        }
+                      );
+                    }
+                  }
+                );
+              }
+            }
+          );
+        }
+      }
+    );
+  }
+});
+
+async function addFarmerToBlockchain(cropId, farmerData) {
+  try {
+    const provider = new ethers.providers.JsonRpcProvider(
+      process.env.BLOCKCHAIN_RPC_URL || "http://localhost:8545"
+    );
+    const adminWallet = new ethers.Wallet(
+      process.env.ADMIN_PRIVATE_KEY,
+      provider
+    );
+    const contract = new ethers.Contract(
+      SUPPLY_CHAIN_TRACKING_ADDRESS,
+      SupplyChainTrackingABI,
+      adminWallet
+    );
+
+    console.log(`\n🌾 Adding farmer to blockchain for crop ${cropId}`);
+
+    const tx = await contract.addFarmer(
+      cropId,
+      farmerData.public_key || ethers.constants.AddressZero,
+      farmerData.name || "",
+      "farmer",
+      farmerData.phone_number || farmerData.number || "",
+      farmerData.physical_address || farmerData.address || ""
+    );
+
+    console.log("Farmer transaction sent:", tx.hash);
+    const receipt = await tx.wait();
+    console.log(
+      "✅ Farmer added to blockchain. Gas used:",
+      receipt.gasUsed.toString()
+    );
+
+    return { success: true, txHash: tx.hash };
+  } catch (error) {
+    console.error("❌ Error adding farmer to blockchain:", error.message);
+    return { success: false, error: error.message };
+  }
+}
+
+// Helper function to add quality checker to blockchain
+async function addQualityCheckerToBlockchain(cropId, qualityCheckerData) {
+  try {
+    const provider = new ethers.providers.JsonRpcProvider(
+      process.env.BLOCKCHAIN_RPC_URL || "http://localhost:8545"
+    );
+    const adminWallet = new ethers.Wallet(
+      process.env.ADMIN_PRIVATE_KEY,
+      provider
+    );
+    const contract = new ethers.Contract(
+      SUPPLY_CHAIN_TRACKING_ADDRESS,
+      SupplyChainTrackingABI,
+      adminWallet
+    );
+
+    console.log(`\n🔍 Adding quality checker to blockchain for crop ${cropId}`);
+
+    const tx = await contract.addQualityChecker(
+      cropId,
+      qualityCheckerData.public_key || ethers.constants.AddressZero,
+      qualityCheckerData.name || "",
+      "qualitychecker",
+      qualityCheckerData.phone_number || qualityCheckerData.number || "",
+      qualityCheckerData.physical_address || qualityCheckerData.address || ""
+    );
+
+    console.log("Quality checker transaction sent:", tx.hash);
+    const receipt = await tx.wait();
+    console.log(
+      "✅ Quality checker added to blockchain. Gas used:",
+      receipt.gasUsed.toString()
+    );
+
+    return { success: true, txHash: tx.hash };
+  } catch (error) {
+    console.error(
+      "❌ Error adding quality checker to blockchain:",
+      error.message
+    );
+    return { success: false, error: error.message };
+  }
+}
+
+// Helper function to add processor to blockchain
+async function addProcessorToBlockchain(cropId, processorData) {
+  try {
+    const provider = new ethers.providers.JsonRpcProvider(
+      process.env.BLOCKCHAIN_RPC_URL || "http://localhost:8545"
+    );
+    const adminWallet = new ethers.Wallet(
+      process.env.ADMIN_PRIVATE_KEY,
+      provider
+    );
+    const contract = new ethers.Contract(
+      SUPPLY_CHAIN_TRACKING_ADDRESS,
+      SupplyChainTrackingABI,
+      adminWallet
+    );
+
+    console.log(`\n🏭 Adding processor to blockchain for crop ${cropId}`);
+
+    const tx = await contract.addProcessor(
+      cropId,
+      processorData.public_key || ethers.constants.AddressZero,
+      processorData.name || "",
+      "processor",
+      processorData.phone_number || processorData.number || "",
+      processorData.physical_address || processorData.address || ""
+    );
+
+    console.log("Processor transaction sent:", tx.hash);
+    const receipt = await tx.wait();
+    console.log(
+      "✅ Processor added to blockchain. Gas used:",
+      receipt.gasUsed.toString()
+    );
+
+    return { success: true, txHash: tx.hash };
+  } catch (error) {
+    console.error("❌ Error adding processor to blockchain:", error.message);
+    return { success: false, error: error.message };
+  }
+}
+
+// Add endpoint to manually trigger blockchain storage for a crop
+app.post("/storeSupplyChainOnBlockchain/:cropId", async (req, res) => {
+  const cropId = req.params.cropId;
+
+  try {
+    // Get data from database
+    const supplyChainData = await new Promise((resolve, reject) => {
+      db.query(
+        "SELECT * FROM users where public_key = (SELECT public_key FROM farmer_brodcast where id = ?)",
+        [cropId],
+        (err, farmer) => {
+          if (err) return reject(err);
+
+          db.query(
+            "SELECT ins.qualityChecker, uw.*  FROM insurance AS ins JOIN user_wallet_info AS uw ON ins.qualityChecker = uw.wallet_address where ins.crop_id = ?",
+            [cropId],
+            (err, quality) => {
+              if (err) return reject(err);
+
+              db.query(
+                "SELECT * FROM users where public_key = (SELECT buyer FROM orders where crop_id = ?)",
+                [cropId],
+                (err, processor) => {
+                  if (err) return reject(err);
+
+                  db.query(
+                    "SELECT * FROM users where public_key = (SELECT buyer FROM retailer where crop_id = ?)",
+                    [cropId],
+                    (err, retailer) => {
+                      if (err) return reject(err);
+
+                      db.query(
+                        "SELECT * FROM users where public_key IN (SELECT DISTINCT(buyer) FROM sales where crop_id = ?)",
+                        [cropId],
+                        (err, customer) => {
+                          if (err) return reject(err);
+
+                          resolve({
+                            farmer: farmer,
+                            quality: quality,
+                            processor: processor,
+                            retailer: retailer,
+                            customer: customer,
+                          });
+                        }
+                      );
+                    }
+                  );
+                }
+              );
+            }
+          );
+        }
+      );
+    });
+
+    // Store on blockchain
+    const result = await storeSupplyChainOnBlockchain(cropId, supplyChainData);
+
+    if (result) {
+      res.json({
+        success: true,
+        message: `Supply chain data for crop ${cropId} stored on blockchain successfully`,
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: "Failed to store data on blockchain",
+      });
+    }
+  } catch (error) {
+    console.error("Error storing supply chain on blockchain:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+// Add endpoint to get blockchain data directly
+app.get("/getBlockchainData/:cropId", async (req, res) => {
+  const cropId = req.params.cropId;
+
+  try {
+    const blockchainData = await getSupplyChainFromBlockchain(cropId);
+
+    if (blockchainData) {
+      res.json({
+        success: true,
+        data: blockchainData,
+        source: "blockchain",
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: "No data found on blockchain for this crop ID",
+      });
+    }
+  } catch (error) {
+    console.error("Error getting blockchain data:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+// Export the functions for use in other parts of your application
+module.exports = {
+  storeSupplyChainOnBlockchain,
+  getSupplyChainFromBlockchain,
+  // ... your other exports
+};
+
 // Temporary storage functions (use Redis or database in production)
 const temporaryTransactions = new Map();
 
@@ -553,20 +1687,38 @@ app.post("/offer/:idd", (req, res) => {
   );
 });
 
-// app.post("/farmerbrodcast", (req, res) => {
-//   const userAccount = req.body.id;
-//   const crop = req.body.crop;
-//   const quantity = req.body.quantity;
-//   const price = req.body.price;
-//   db.query(
-//     "INSERT INTO farmer_brodcast (public_key,crop,quantity,price,status) VALUES(?,?,?,?,?)",
-//     [userAccount, crop, quantity, price, "open"],
-//     (err, result) => {
-//       if (result) {
-//         res.send("Successfully Broadcasted");
-//       }
+// app.post("/farmerbrodcast", async (req, res) => {
+//   try {
+//     const { crop, quantity, unit, price, id } = req.body;
+
+//     // Validate the unit is one of the allowed values
+//     const allowedUnits = [
+//       "kg",
+//       "tonnes",
+//       "bags",
+//       "pieces",
+//       "boxes",
+//       "crates",
+//       "bundles",
+//       "sacks",
+//     ];
+//     if (!allowedUnits.includes(unit)) {
+//       return res.status(400).json({ message: "Invalid unit specified" });
 //     }
-//   );
+
+//     // Insert into database
+//     const query = `
+//       INSERT INTO farmer_brodcast (crop, quantity, unit, price, public_key, created_at)
+//       VALUES (?, ?, ?, ?, ?, NOW())
+//     `;
+
+//     await db.execute(query, [crop, quantity, unit, price, id]);
+
+//     res.json("Broadcast added successfully!");
+//   } catch (error) {
+//     console.error("Error adding broadcast:", error);
+//     res.status(500).json({ message: "Failed to add broadcast" });
+//   }
 // });
 
 app.post("/farmerbrodcast", async (req, res) => {
@@ -594,16 +1746,127 @@ app.post("/farmerbrodcast", async (req, res) => {
       VALUES (?, ?, ?, ?, ?, NOW())
     `;
 
-    await db.execute(query, [crop, quantity, unit, price, id]);
+    db.execute(
+      query,
+      [crop, quantity, unit, price, id],
+      async (err, result) => {
+        if (err) {
+          console.error("Database error:", err);
+          return res.status(500).json({ message: "Failed to add broadcast" });
+        }
 
-    res.json("Broadcast added successfully!");
+        if (result) {
+          const cropId = result.insertId; // Get the newly created crop ID
+
+          // Get farmer details
+          db.query(
+            "SELECT * FROM users WHERE public_key = ?",
+            [id],
+            async (err, farmerResult) => {
+              if (err) {
+                console.error("Error fetching farmer details:", err);
+                return res.json({
+                  message:
+                    "Broadcast added successfully but couldn't fetch farmer details for blockchain",
+                  cropId: cropId,
+                });
+              }
+
+              if (farmerResult && farmerResult.length > 0) {
+                const farmer = farmerResult[0];
+
+                // Add farmer to blockchain
+                const blockchainResult = await addFarmerToBlockchain(
+                  cropId,
+                  farmer
+                );
+
+                if (blockchainResult.success) {
+                  res.json({
+                    message:
+                      "Broadcast added successfully and stored on blockchain!",
+                    cropId: cropId,
+                    blockchainTx: blockchainResult.txHash,
+                  });
+                } else {
+                  res.json({
+                    message: `Broadcast added successfully but blockchain storage failed: ${blockchainResult.error}`,
+                    cropId: cropId,
+                  });
+                }
+              } else {
+                res.json({
+                  message: "Broadcast added successfully!",
+                  cropId: cropId,
+                });
+              }
+            }
+          );
+        }
+      }
+    );
   } catch (error) {
     console.error("Error adding broadcast:", error);
     res.status(500).json({ message: "Failed to add broadcast" });
   }
 });
-
 // Function to process successful payment (your commented database operations)
+// async function processSuccessfulPayment(
+//   crop_name,
+//   qprice,
+//   lotId,
+//   buyer,
+//   seller,
+//   quantity
+// ) {
+//   return new Promise((resolve, reject) => {
+//     db.query(
+//       "INSERT INTO orders (crop_name,price,crop_id,buyer,seller,quantity,status) VALUES(?,?,?,?,?,?,?)",
+//       [crop_name, qprice, lotId, buyer, seller, quantity, "no"], // Changed status to "paid"
+//       (err, result) => {
+//         if (result) {
+//           db.query(
+//             "UPDATE farmer_brodcast SET status = ? WHERE id = ?",
+//             ["retailer", lotId],
+//             (err, result) => {
+//               if (result) {
+//                 db.query(
+//                   "UPDATE offers SET status = ? WHERE crop_id = ?",
+//                   ["paid", lotId],
+//                   (err, result) => {
+//                     if (result) {
+//                       db.query(
+//                         "UPDATE insurance SET status = ? WHERE crop_id = ?",
+//                         ["sold", lotId],
+//                         (err, result) => {
+//                           if (result) {
+//                             console.log(
+//                               "All database updates completed successfully"
+//                             );
+//                             resolve("Payment processed successfully");
+//                           } else {
+//                             reject(new Error("Failed to update insurance"));
+//                           }
+//                         }
+//                       );
+//                     } else {
+//                       reject(new Error("Failed to update offers"));
+//                     }
+//                   }
+//                 );
+//               } else {
+//                 reject(new Error("Failed to update farmer_brodcast"));
+//               }
+//             }
+//           );
+//         } else {
+//           reject(new Error("Failed to insert order"));
+//         }
+//       }
+//     );
+//   });
+// }
+
 async function processSuccessfulPayment(
   crop_name,
   qprice,
@@ -617,26 +1880,126 @@ async function processSuccessfulPayment(
       "INSERT INTO orders (crop_name,price,crop_id,buyer,seller,quantity,status) VALUES(?,?,?,?,?,?,?)",
       [crop_name, qprice, lotId, buyer, seller, quantity, "no"], // Changed status to "paid"
       (err, result) => {
+        if (err) {
+          console.error("Error inserting order:", err);
+          reject(new Error("Failed to insert order"));
+          return;
+        }
+
         if (result) {
           db.query(
             "UPDATE farmer_brodcast SET status = ? WHERE id = ?",
             ["retailer", lotId],
             (err, result) => {
+              if (err) {
+                console.error("Error updating farmer_brodcast:", err);
+                reject(new Error("Failed to update farmer_brodcast"));
+                return;
+              }
+
               if (result) {
                 db.query(
                   "UPDATE offers SET status = ? WHERE crop_id = ?",
                   ["paid", lotId],
                   (err, result) => {
+                    if (err) {
+                      console.error("Error updating offers:", err);
+                      reject(new Error("Failed to update offers"));
+                      return;
+                    }
+
                     if (result) {
                       db.query(
                         "UPDATE insurance SET status = ? WHERE crop_id = ?",
                         ["sold", lotId],
-                        (err, result) => {
+                        async (err, result) => {
+                          if (err) {
+                            console.error("Error updating insurance:", err);
+                            reject(new Error("Failed to update insurance"));
+                            return;
+                          }
+
                           if (result) {
                             console.log(
                               "All database updates completed successfully"
                             );
-                            resolve("Payment processed successfully");
+
+                            // Get processor details and add to blockchain
+                            db.query(
+                              "SELECT * FROM users WHERE public_key = ?",
+                              [buyer],
+                              async (err, processorResult) => {
+                                if (err) {
+                                  console.error(
+                                    "Error fetching processor details:",
+                                    err
+                                  );
+                                  // Still resolve but note the blockchain issue
+                                  resolve({
+                                    success: true,
+                                    message:
+                                      "Payment processed successfully but couldn't fetch processor for blockchain",
+                                    orderId: result.insertId,
+                                  });
+                                  return;
+                                }
+
+                                if (
+                                  processorResult &&
+                                  processorResult.length > 0
+                                ) {
+                                  const processor = processorResult[0];
+
+                                  // Add processor to blockchain
+                                  try {
+                                    const blockchainResult =
+                                      await addProcessorToBlockchain(
+                                        lotId,
+                                        processor
+                                      );
+
+                                    if (blockchainResult.success) {
+                                      console.log(
+                                        `✅ Processor added to blockchain for crop ${lotId}`
+                                      );
+                                      resolve({
+                                        success: true,
+                                        message:
+                                          "Payment processed successfully and processor added to blockchain!",
+                                        orderId: result.insertId,
+                                        blockchainTx: blockchainResult.txHash,
+                                      });
+                                    } else {
+                                      console.error(
+                                        `❌ Failed to add processor to blockchain: ${blockchainResult.error}`
+                                      );
+                                      resolve({
+                                        success: true,
+                                        message: `Payment processed successfully but blockchain storage failed: ${blockchainResult.error}`,
+                                        orderId: result.insertId,
+                                      });
+                                    }
+                                  } catch (blockchainError) {
+                                    console.error(
+                                      "Blockchain error:",
+                                      blockchainError
+                                    );
+                                    resolve({
+                                      success: true,
+                                      message:
+                                        "Payment processed successfully but blockchain storage failed",
+                                      orderId: result.insertId,
+                                    });
+                                  }
+                                } else {
+                                  resolve({
+                                    success: true,
+                                    message: "Payment processed successfully",
+                                    orderId: result.insertId,
+                                  });
+                                }
+                              }
+                            );
                           } else {
                             reject(new Error("Failed to update insurance"));
                           }
@@ -673,14 +2036,109 @@ async function processRetailPayment(
       "UPDATE processor SET status = ? WHERE crop_id = ?",
       ["close", id],
       (err, result) => {
+        if (err) {
+          console.error("Error updating processor status:", err);
+          reject(new Error("Failed to update processor table"));
+          return;
+        }
+
         if (result) {
           db.query(
             "INSERT INTO retailer (crop_id, product_name, quantity, seller, buyer, status, price) VALUES(?,?,?,?,?,?,?)",
             [id, product, quantity, seller, buyer, "open", price],
-            (err, result) => {
+            async (err, result) => {
+              if (err) {
+                console.error("Error inserting into retailer table:", err);
+                reject(new Error("Failed to insert into retailer table"));
+                return;
+              }
+
               if (result) {
                 console.log("Retailer purchase processed successfully");
-                resolve("Successfully bought by retailer");
+
+                // Get retailer details and add to blockchain
+                db.query(
+                  "SELECT * FROM users WHERE public_key = ?",
+                  [buyer],
+                  async (err, retailerResult) => {
+                    if (err) {
+                      console.error("Error fetching retailer details:", err);
+                      // Still resolve but note the blockchain issue
+                      resolve({
+                        success: true,
+                        message:
+                          "Successfully bought by retailer but couldn't fetch retailer for blockchain",
+                        retailerId: result.insertId,
+                      });
+                      return;
+                    }
+
+                    if (retailerResult && retailerResult.length > 0) {
+                      const retailer = retailerResult[0];
+
+                      // Add retailer to blockchain
+                      try {
+                        const provider = new ethers.providers.JsonRpcProvider(
+                          process.env.BLOCKCHAIN_RPC_URL ||
+                            "http://localhost:8545"
+                        );
+                        const adminWallet = new ethers.Wallet(
+                          process.env.ADMIN_PRIVATE_KEY,
+                          provider
+                        );
+                        const contract = new ethers.Contract(
+                          SUPPLY_CHAIN_TRACKING_ADDRESS,
+                          SupplyChainTrackingABI,
+                          adminWallet
+                        );
+
+                        console.log(
+                          `\n🏪 Adding retailer to blockchain for crop ${id}`
+                        );
+
+                        const tx = await contract.addRetailer(
+                          id,
+                          retailer.public_key || ethers.constants.AddressZero,
+                          retailer.name || "",
+                          "retailer",
+                          retailer.phone_number || retailer.number || "",
+                          retailer.physical_address || retailer.address || ""
+                        );
+
+                        console.log("Retailer transaction sent:", tx.hash);
+                        const receipt = await tx.wait();
+                        console.log(
+                          "✅ Retailer added to blockchain. Gas used:",
+                          receipt.gasUsed.toString()
+                        );
+
+                        resolve({
+                          success: true,
+                          message:
+                            "Successfully bought by retailer and added to blockchain!",
+                          retailerId: result.insertId,
+                          blockchainTx: tx.hash,
+                        });
+                      } catch (blockchainError) {
+                        console.error(
+                          "❌ Error adding retailer to blockchain:",
+                          blockchainError.message
+                        );
+                        resolve({
+                          success: true,
+                          message: `Successfully bought by retailer but blockchain storage failed: ${blockchainError.message}`,
+                          retailerId: result.insertId,
+                        });
+                      }
+                    } else {
+                      resolve({
+                        success: true,
+                        message: "Successfully bought by retailer",
+                        retailerId: result.insertId,
+                      });
+                    }
+                  }
+                );
               } else {
                 reject(new Error("Failed to insert into retailer table"));
               }
@@ -694,7 +2152,42 @@ async function processRetailPayment(
   });
 }
 
+// async function processRetailPayment(
+//   product,
+//   price,
+//   id,
+//   seller,
+//   buyer,
+//   quantity
+// ) {
+//   return new Promise((resolve, reject) => {
+//     db.query(
+//       "UPDATE processor SET status = ? WHERE crop_id = ?",
+//       ["close", id],
+//       (err, result) => {
+//         if (result) {
+//           db.query(
+//             "INSERT INTO retailer (crop_id, product_name, quantity, seller, buyer, status, price) VALUES(?,?,?,?,?,?,?)",
+//             [id, product, quantity, seller, buyer, "open", price],
+//             (err, result) => {
+//               if (result) {
+//                 console.log("Retailer purchase processed successfully");
+//                 resolve("Successfully bought by retailer");
+//               } else {
+//                 reject(new Error("Failed to insert into retailer table"));
+//               }
+//             }
+//           );
+//         } else {
+//           reject(new Error("Failed to update processor table"));
+//         }
+//       }
+//     );
+//   });
+// }
+
 // Helper function to generate unique reference
+
 function generateReference() {
   const timestamp = Date.now();
   const random = Math.floor(Math.random() * 1000);
@@ -912,6 +2405,35 @@ async function removeTemporaryTransaction(reference) {
   temporaryTransactions.delete(reference);
 }
 
+// app.post("/qualityReport", (req, res) => {
+//   const crop = req.body.crop;
+//   const quantity = req.body.quantity;
+//   const samples = req.body.samples;
+//   const defect = req.body.defect;
+//   const remarks = req.body.remarks;
+//   const id = req.body.id;
+//   const qAccount = req.body.qualityCheckerAccount;
+//   db.query(
+//     "UPDATE insurance SET status = ?, qualityChecker = ? WHERE crop_id = ?",
+//     ["done", qAccount, id],
+//     (err, result) => {
+//       if (result) {
+//         db.query(
+//           "INSERT INTO report (crop_id, sample_size, defective, remark, qualityChecker, created_at) VALUES (?, ?, ?, ?, ?, NOW())",
+//           [id, samples, defect, remarks, qAccount],
+//           (err, result) => {
+//             if (result) {
+//               res.send("Successfully Added report");
+//             }
+//           }
+//         );
+//       } else {
+//         res.send("Unable to update");
+//       }
+//     }
+//   );
+// });
+
 app.post("/qualityReport", (req, res) => {
   const crop = req.body.crop;
   const quantity = req.body.quantity;
@@ -920,17 +2442,108 @@ app.post("/qualityReport", (req, res) => {
   const remarks = req.body.remarks;
   const id = req.body.id;
   const qAccount = req.body.qualityCheckerAccount;
+
   db.query(
     "UPDATE insurance SET status = ?, qualityChecker = ? WHERE crop_id = ?",
     ["done", qAccount, id],
     (err, result) => {
+      if (err) {
+        console.error("Error updating insurance:", err);
+        return res.status(500).send("Unable to update insurance status");
+      }
+
       if (result) {
         db.query(
           "INSERT INTO report (crop_id, sample_size, defective, remark, qualityChecker, created_at) VALUES (?, ?, ?, ?, ?, NOW())",
           [id, samples, defect, remarks, qAccount],
-          (err, result) => {
+          async (err, result) => {
+            if (err) {
+              console.error("Error inserting report:", err);
+              return res.status(500).send("Failed to add report");
+            }
+
             if (result) {
-              res.send("Successfully Added report");
+              // Get quality checker details using the provided account
+              db.query(
+                "SELECT * FROM users WHERE public_key = ?",
+                [qAccount],
+                async (err, qualityResult) => {
+                  if (err) {
+                    console.error(
+                      "Error fetching quality checker details:",
+                      err
+                    );
+                    return res.json({
+                      message:
+                        "Report added successfully but couldn't fetch quality checker details for blockchain",
+                      reportId: result.insertId,
+                    });
+                  }
+
+                  if (qualityResult && qualityResult.length > 0) {
+                    const qualityChecker = qualityResult[0];
+
+                    // Add quality checker to blockchain
+                    const blockchainResult =
+                      await addQualityCheckerToBlockchain(id, qualityChecker);
+
+                    if (blockchainResult.success) {
+                      res.json({
+                        message:
+                          "Successfully added report and quality checker to blockchain!",
+                        reportId: result.insertId,
+                        blockchainTx: blockchainResult.txHash,
+                      });
+                    } else {
+                      res.json({
+                        message: `Report added successfully but blockchain storage failed: ${blockchainResult.error}`,
+                        reportId: result.insertId,
+                      });
+                    }
+                  } else {
+                    // If no specific quality checker found, try to use any quality checker
+                    db.query(
+                      "SELECT * FROM users WHERE role = ? LIMIT 1",
+                      ["qualitychecker"],
+                      async (err, defaultQualityResult) => {
+                        if (
+                          err ||
+                          !defaultQualityResult ||
+                          defaultQualityResult.length === 0
+                        ) {
+                          return res.json({
+                            message: "Successfully added report",
+                            reportId: result.insertId,
+                          });
+                        }
+
+                        const qualityChecker = defaultQualityResult[0];
+
+                        // Add quality checker to blockchain
+                        const blockchainResult =
+                          await addQualityCheckerToBlockchain(
+                            id,
+                            qualityChecker
+                          );
+
+                        if (blockchainResult.success) {
+                          res.json({
+                            message:
+                              "Successfully added report and quality checker to blockchain!",
+                            reportId: result.insertId,
+                            blockchainTx: blockchainResult.txHash,
+                          });
+                        } else {
+                          res.json({
+                            message: `Report added successfully but blockchain storage failed: ${blockchainResult.error}`,
+                            reportId: result.insertId,
+                          });
+                        }
+                      }
+                    );
+                  }
+                }
+              );
             }
           }
         );
@@ -1928,28 +3541,6 @@ app.post("/paidProcessor/:id", async (req, res) => {
       error: error.message,
     });
   }
-
-  // db.query(
-  //   "UPDATE  processor SET status = ? WHERE crop_id = ?",
-  //   ["close", id],
-  //   (err, result) => {
-  //     if (result) {
-  //       //insert
-
-  //       db.query(
-  //         "INSERT INTO retailer (crop_id,product_name,quantity,seller,buyer,status,price) VALUES(?,?,?,?,?,?,?)",
-  //         [id, product, quantity, seller, userAccount, "open", price],
-  //         (err, result) => {
-  //           if (result) {
-  //             res.send("Successfully Bought by retailer");
-  //           }
-  //         }
-  //       );
-  //     } else {
-  //       res.send("Unable to update");
-  //     }
-  //   }
-  // );
 });
 
 app.put("/paidUpdate/:lotId", (req, res) => {
@@ -2079,57 +3670,57 @@ app.get("/rpreviousTransactions/:id", (req, res) => {
   );
 });
 
-app.get("/getData/:crop", (req, res) => {
-  const crop = req.params["crop"];
-  db.query(
-    "SELECT * FROM users where public_key = (SELECT public_key FROM farmer_brodcast where id = ?)",
-    [crop],
-    (err, farmer) => {
-      if (farmer) {
-        db.query(
-          "SELECT ins.qualityChecker, uw.*  FROM insurance AS ins JOIN user_wallet_info AS uw ON ins.qualityChecker = uw.wallet_address where ins.crop_id = ?",
-          [crop],
-          (err, quality) => {
-            if (quality) {
-              db.query(
-                "SELECT * FROM users where public_key = (SELECT buyer FROM orders where crop_id = ?)",
-                [crop],
-                (err, processor) => {
-                  if (processor) {
-                    db.query(
-                      "SELECT * FROM users where public_key = (SELECT buyer FROM retailer where crop_id = ?)",
-                      [crop],
-                      (err, retailer) => {
-                        if (retailer) {
-                          db.query(
-                            "SELECT * FROM users where public_key IN (SELECT DISTINCT(buyer) FROM sales where crop_id = ?)",
-                            [crop],
-                            (err, customer) => {
-                              if (customer) {
-                                const response = [
-                                  farmer,
-                                  quality,
-                                  processor,
-                                  retailer,
-                                  customer,
-                                ];
-                                res.send(response);
-                              }
-                            }
-                          );
-                        }
-                      }
-                    );
-                  }
-                }
-              );
-            }
-          }
-        );
-      }
-    }
-  );
-});
+// app.get("/getData/:crop", (req, res) => {
+//   const crop = req.params["crop"];
+//   db.query(
+//     "SELECT * FROM users where public_key = (SELECT public_key FROM farmer_brodcast where id = ?)",
+//     [crop],
+//     (err, farmer) => {
+//       if (farmer) {
+//         db.query(
+//           "SELECT ins.qualityChecker, uw.*  FROM insurance AS ins JOIN user_wallet_info AS uw ON ins.qualityChecker = uw.wallet_address where ins.crop_id = ?",
+//           [crop],
+//           (err, quality) => {
+//             if (quality) {
+//               db.query(
+//                 "SELECT * FROM users where public_key = (SELECT buyer FROM orders where crop_id = ?)",
+//                 [crop],
+//                 (err, processor) => {
+//                   if (processor) {
+//                     db.query(
+//                       "SELECT * FROM users where public_key = (SELECT buyer FROM retailer where crop_id = ?)",
+//                       [crop],
+//                       (err, retailer) => {
+//                         if (retailer) {
+//                           db.query(
+//                             "SELECT * FROM users where public_key IN (SELECT DISTINCT(buyer) FROM sales where crop_id = ?)",
+//                             [crop],
+//                             (err, customer) => {
+//                               if (customer) {
+//                                 const response = [
+//                                   farmer,
+//                                   quality,
+//                                   processor,
+//                                   retailer,
+//                                   customer,
+//                                 ];
+//                                 res.send(response);
+//                               }
+//                             }
+//                           );
+//                         }
+//                       }
+//                     );
+//                   }
+//                 }
+//               );
+//             }
+//           }
+//         );
+//       }
+//     }
+//   );
+// });
 
 app.get("/getInvestments", (req, res) => {
   db.query(
