@@ -12,8 +12,10 @@ import { useSelector } from "react-redux";
 function Broadcast() {
   const [crop, setCrop] = useState("");
   const [quantity, setQuantity] = useState("");
-  const [unit, setUnit] = useState("kg"); // New state for unit
+  const [unit, setUnit] = useState("kg");
   const [price, setPrice] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
   const id = useSelector((state) => state.db.userAcc);
 
   const nameH = (e) => {
@@ -34,19 +36,50 @@ function Broadcast() {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    Axios.post("http://localhost:3001/farmerbrodcast", {
-      crop: crop,
-      quantity: quantity,
-      unit: unit,
-      price: price,
-      id: id,
-    }).then((resp) => {
-      alert(resp.data);
-    });
-    setCrop("");
-    setQuantity("");
-    setUnit("kg");
-    setPrice("");
+    setIsLoading(true);
+    setLoadingMessage("Saving broadcast to database...");
+
+    try {
+      const response = await Axios.post(
+        "http://localhost:3001/farmerbrodcast",
+        {
+          crop: crop,
+          quantity: quantity,
+          unit: unit,
+          price: price,
+          id: id,
+        }
+      );
+
+      // Update loading message when blockchain processing starts
+      if (
+        response.data.message &&
+        response.data.message.includes("blockchain")
+      ) {
+        setLoadingMessage("Adding to blockchain... This may take a moment");
+      }
+
+      // Show success message
+      if (response.data.blockchainTx) {
+        alert(
+          `Success! ${response.data.message}\nBlockchain TX: ${response.data.blockchainTx}`
+        );
+      } else {
+        alert(response.data.message || response.data);
+      }
+
+      // Reset form
+      setCrop("");
+      setQuantity("");
+      setUnit("kg");
+      setPrice("");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to add broadcast. Please try again.");
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage("");
+    }
   };
 
   return (
@@ -80,6 +113,7 @@ function Broadcast() {
                       onChange={nameH}
                       value={crop}
                       required
+                      disabled={isLoading}
                     />
                   </div>
 
@@ -98,6 +132,7 @@ function Broadcast() {
                           onChange={quantityH}
                           value={quantity}
                           required
+                          disabled={isLoading}
                         />
                       </div>
                     </div>
@@ -115,6 +150,7 @@ function Broadcast() {
                         onChange={unitH}
                         value={unit}
                         required
+                        disabled={isLoading}
                       >
                         <option value="kg">Kilograms (kg)</option>
                         <option value="pieces">Pieces</option>
@@ -140,6 +176,7 @@ function Broadcast() {
                       onChange={priceH}
                       value={price}
                       required
+                      disabled={isLoading}
                     />
                   </div>
 
@@ -148,16 +185,88 @@ function Broadcast() {
                       type="submit"
                       name="broadcastCrop"
                       className="btn btn-lg bg-gradient-info btn-lg w-100 mt-4 mb-0"
+                      disabled={isLoading}
+                      style={{ position: "relative" }}
                     >
-                      Add Broadcast
+                      {isLoading ? (
+                        <span className="d-flex align-items-center justify-content-center">
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                            aria-hidden="true"
+                          ></span>
+                          Processing...
+                        </span>
+                      ) : (
+                        "Add Broadcast"
+                      )}
                     </button>
                   </div>
+
+                  {/* Loading Message */}
+                  {isLoading && loadingMessage && (
+                    <div className="mt-3 text-center">
+                      <div
+                        className="alert alert-info d-flex align-items-center"
+                        role="alert"
+                      >
+                        <div
+                          className="spinner-grow spinner-grow-sm me-2"
+                          role="status"
+                        >
+                          <span className="visually-hidden">Loading...</span>
+                        </div>
+                        <div className="d-flex flex-column align-items-start">
+                          <span>{loadingMessage}</span>
+                          {loadingMessage.includes("blockchain") && (
+                            <small className="text-muted mt-1">
+                              <i
+                                className="material-icons"
+                                style={{
+                                  fontSize: "14px",
+                                  verticalAlign: "middle",
+                                }}
+                              >
+                                link
+                              </i>
+                              Storing on blockchain for permanent record
+                            </small>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </form>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Custom CSS for the loader */}
+      <style jsx>{`
+        .spinner-grow-sm {
+          width: 1rem;
+          height: 1rem;
+        }
+
+        .alert-info {
+          background-color: #e3f2fd;
+          border-color: #bbdefb;
+          color: #0d47a1;
+        }
+
+        form[disabled] {
+          opacity: 0.6;
+          pointer-events: none;
+        }
+
+        .spinner-border-sm {
+          width: 1rem;
+          height: 1rem;
+          border-width: 0.2em;
+        }
+      `}</style>
     </div>
   );
 }
