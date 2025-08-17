@@ -144,13 +144,7 @@ function FarmerBroadcast() {
           </h6>
         </td>
         <td className="align-middle text-center text-sm">
-          {/* <h6 className="mb-0 text-sm text-success">
-            GH₵{" "}
-            {(parseFloat(element.quantity) * parseFloat(element.price)).toFixed(
-              2
-            )}
-          </h6> */}
-          {/* <small className="text-muted">Total Value</small> */}
+          <p className="text-xs font-weight-bold mb-0">{element.status}</p>
         </td>
       </tr>
     );
@@ -190,9 +184,9 @@ function FarmerBroadcast() {
                             <th className="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
                               Quantity
                             </th>
-                            {/* <th className="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                              Total
-                            </th> */}
+                            <th className="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                              Status
+                            </th>
                           </tr>
                         </thead>
                         <tbody>{list}</tbody>

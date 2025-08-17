@@ -59,7 +59,7 @@ function CustomerSidebar(props) {
                 </a>
               </Link>
             </li>
-            <li className="nav-item nav-tile">
+            {/* <li className="nav-item nav-tile">
               <Link to="/consumer/history">
                 <a
                   className={`nav-link text-white ${
@@ -72,7 +72,7 @@ function CustomerSidebar(props) {
                   <span className="nav-link-text ms-1">Previous Purchases</span>
                 </a>
               </Link>
-            </li>
+            </li> */}
             <li className="nav-item nav-tile">
               <Link to="/consumer/status">
                 <a

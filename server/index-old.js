@@ -772,3 +772,113 @@ app.post("/customerPayment/:id", async (req, res) => {
     }
   );
 });
+
+
+async function processRetailPayment(
+  product,
+  price,
+  id,
+  seller,
+  buyer,
+  quantity
+) {
+  return new Promise((resolve, reject) => {
+    db.query(
+      "UPDATE processor SET status = ? WHERE crop_id = ?",
+      ["close", id],
+      (err, result) => {
+        if (err) {
+          console.error("Error updating processor status:", err);
+          reject(new Error("Failed to update processor table"));
+          return;
+        }
+
+        if (result) {
+          db.query(
+            "INSERT INTO retailer (crop_id, product_name, quantity, seller, buyer, status, price) VALUES(?,?,?,?,?,?,?)",
+            [id, product, quantity, seller, buyer, "open", price],
+            async (err, result) => {
+              if (err) {
+                console.error("Error inserting into retailer table:", err);
+                reject(new Error("Failed to insert into retailer table"));
+                return;
+              }
+
+              if (result) {
+                console.log("Retailer purchase processed successfully");
+                
+                // Get retailer details and add to blockchain
+                db.query(
+                  "SELECT * FROM users WHERE public_key = ?",
+                  [buyer],
+                  async (err, retailerResult) => {
+                    if (err) {
+                      console.error("Error fetching retailer details:", err);
+                      // Still resolve but note the blockchain issue
+                      resolve({
+                        success: true,
+                        message: "Successfully bought by retailer but couldn't fetch retailer for blockchain",
+                        retailerId: result.insertId
+                      });
+                      return;
+                    }
+                    
+                    if (retailerResult && retailerResult.length > 0) {
+                      const retailer = retailerResult[0];
+                      
+                      // Add retailer to blockchain
+                      try {
+                        const provider = new ethers.providers.JsonRpcProvider(process.env.BLOCKCHAIN_RPC_URL || "http://localhost:8545");
+                        const adminWallet = new ethers.Wallet(process.env.ADMIN_PRIVATE_KEY, provider);
+                        const contract = new ethers.Contract(SUPPLY_CHAIN_TRACKING_ADDRESS, SupplyChainTrackingABI, adminWallet);
+                        
+                        console.log(`\n🏪 Adding retailer to blockchain for crop ${id}`);
+                        
+                        const tx = await contract.addRetailer(
+                          id,
+                          retailer.public_key || ethers.constants.AddressZero,
+                          retailer.name || "",
+                          "retailer",
+                          retailer.phone_number || retailer.number || "",
+                          retailer.physical_address || retailer.address || ""
+                        );
+                        
+                        console.log('Retailer transaction sent:', tx.hash);
+                        const receipt = await tx.wait();
+                        console.log('✅ Retailer added to blockchain. Gas used:', receipt.gasUsed.toString());
+                        
+                        resolve({
+                          success: true,
+                          message: "Successfully bought by retailer and added to blockchain!",
+                          retailerId: result.insertId,
+                          blockchainTx: tx.hash
+                        });
+                      } catch (blockchainError) {
+                        console.error('❌ Error adding retailer to blockchain:', blockchainError.message);
+                        resolve({
+                          success: true,
+                          message: `Successfully bought by retailer but blockchain storage failed: ${blockchainError.message}`,
+                          retailerId: result.insertId
+                        });
+                      }
+                    } else {
+                      resolve({
+                        success: true,
+                        message: "Successfully bought by retailer",
+                        retailerId: result.insertId
+                      });
+                    }
+                  }
+                );
+              } else {
+                reject(new Error("Failed to insert into retailer table"));
+              }
+            }
+          );
+        } else {
+          reject(new Error("Failed to update processor table"));
+        }
+      }
+    );
+  });
+}

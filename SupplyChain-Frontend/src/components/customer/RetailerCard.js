@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { dbActions } from "../../store/dbSlice";
 import { useNavigate } from "react-router-dom";
 function RetailerCard(props) {
-  const { product, price, retailer, quantity, crop_id } = props;
+  const { product, price, retailer, retailer_name, quantity, crop_id } = props;
   const [result, setResult] = useState("");
   const [d, setD] = useState(false);
   const [quantityE, setQuantityE] = useState(1);
@@ -108,7 +108,7 @@ function RetailerCard(props) {
               <span className="text-success text-sm font-weight-bolder">
                 Name :
               </span>
-              &nbsp;&nbsp;{retailer}&nbsp;&nbsp;&nbsp;&nbsp;
+              &nbsp;&nbsp;{retailer_name}&nbsp;&nbsp;&nbsp;&nbsp;
             </p>
           </div>
           <div className="card-footer p-2">
@@ -119,8 +119,16 @@ function RetailerCard(props) {
               &nbsp;&nbsp;{quantity}&nbsp;&nbsp;&nbsp;&nbsp;
             </p>
           </div>
+          <div className="card-footer p-2">
+            <p className="mb-0">
+              <span className="text-success text-sm font-weight-bolder">
+                Product ID :
+              </span>
+              &nbsp;&nbsp;{crop_id}&nbsp;&nbsp;&nbsp;&nbsp;
+            </p>
+          </div>
         </div>
-        <div className="farmerproduct-body mt-1">
+        {/* <div className="farmerproduct-body mt-1">
           <form onSubmit={submitHandler}>
             <div class="input-group input-group-outline mb-3">
               <input
@@ -145,7 +153,7 @@ function RetailerCard(props) {
               </button>
             </div>
           </form>
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -2980,8 +2980,8 @@ app.get("/qualityD", (req, res) => {
 app.get("/farmerbrodcastcall/:id", (req, res) => {
   const id = req.params["id"];
   db.query(
-    "SELECT * FROM farmer_brodcast WHERE public_key = ? && status = ?",
-    [id, "open"],
+    "SELECT * FROM farmer_brodcast WHERE public_key = ?",
+    [id],
 
     (err, result) => {
       if (result) {
@@ -3120,7 +3120,7 @@ app.get("/farmerbrodcastcallprocessor", (req, res) => {
 
 app.get("/reailerBrodcasts/:id", (req, res) => {
   db.query(
-    "SELECT * FROM customer WHERE  status = ? ORDER BY id DESC",
+    "SELECT * FROM customer JOIN user_wallet_info ON user_wallet_info.wallet_address = customer.retailer WHERE  customer.status = ? ORDER BY customer.id DESC",
     ["open"],
 
     (err, result) => {

@@ -30,6 +30,7 @@ function CustomerRetailerBroadcast() {
         product={d.product_name}
         price={d.price}
         retailer={d.retailer}
+        retailer_name={d.name}
         quantity={d.quantity}
         crop_id={d.crop_id}
       ></RetailerCard>
